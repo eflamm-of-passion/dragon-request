@@ -1,13 +1,8 @@
 package io.eflamm.domain.model
 
-import io.eflamm.domain.model.endpoint.DomainName
-import io.eflamm.domain.model.endpoint.Port
-import io.eflamm.domain.model.endpoint.Protocol
-import io.eflamm.io.eflamm.domain.model.endpoint.Id
-import io.eflamm.io.eflamm.domain.model.endpoint.Path
-import io.eflamm.io.eflamm.domain.model.endpoint.QueryParameters
+import io.eflamm.domain.model.endpoint.*
 
-class Endpoint(id: Id, protocol: Protocol, domain: DomainName, port: Port, path: Path, queryParameters: QueryParameters) {
-
+// FIXME do no use null, but empty Id instead
+class Endpoint(val id: Id? = null, val protocol: Protocol, val domain: DomainName, val port: Port, val path: Path, val queryParameters: QueryParameters) {
 
 }

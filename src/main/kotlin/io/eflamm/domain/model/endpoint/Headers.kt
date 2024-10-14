@@ -1,4 +1,4 @@
-package io.eflamm.io.eflamm.domain.model.endpoint
+package io.eflamm.domain.model.endpoint
 
 class Headers {
 }

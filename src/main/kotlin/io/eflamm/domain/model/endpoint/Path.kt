@@ -1,4 +1,10 @@
-package io.eflamm.io.eflamm.domain.model.endpoint
+package io.eflamm.domain.model.endpoint
 
-class Path(pathSegments: List<String>) {
+class Path(val pathSegments: List<String>) {
+    fun get(): List<String> {
+        return pathSegments
+    }
+    fun aggregate(): String {
+        return pathSegments.joinToString { "/" }
+    }
 }
