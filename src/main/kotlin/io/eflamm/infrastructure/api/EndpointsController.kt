@@ -1,34 +1,42 @@
-package io.eflamm.adapters.api
+package io.eflamm.infrastructure.api
 
+import io.eflamm.application.usecase.CreateEndpointUseCase
+import io.eflamm.application.usecase.GetEndpointUseCase
 import io.eflamm.domain.model.Endpoint
 import io.eflamm.domain.model.endpoint.DomainName
 import io.eflamm.domain.model.endpoint.Port
 import io.eflamm.domain.model.endpoint.Protocol
 import io.eflamm.domain.model.endpoint.QueryParameters
-import io.eflamm.domain.usecase.CreateEndpointUseCase
-import io.eflamm.domain.usecase.GetEndpointUseCase
 import jakarta.ws.rs.GET
-import jakarta.ws.rs.POST
 import jakarta.ws.rs.Path
+import jakarta.ws.rs.PathParam
 import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 
 @Path("/endpoints")
-class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, private val createEndpointUseCase: CreateEndpointUseCase) {
+class EndpointsController() {
+//    class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, private val createEndpointUseCase: CreateEndpointUseCase) {
 
     @GET
-    @Produces(MediaType.APPLICATION_JSON)
-    fun getEndpoint(id: String): EndpointOutput {
-        val endpoint = getEndpointUseCase.execute(id)
-        return entityToDto(endpoint)
+    @Produces(MediaType.TEXT_PLAIN)
+    fun hello(): String {
+        return "Hello from Quarkus REST!!!!!!!!!!"
     }
 
-    @POST
-    @Produces(MediaType.APPLICATION_JSON)
-    fun createEndpoint(endpointInput: EndpointInput): EndpointOutput {
-        val endpoint =  createEndpointUseCase.execute(dtoToEntity(endpointInput))
-        return entityToDto(endpoint)
-    }
+//    @GET
+//    @Path("/{id}")
+//    @Produces(MediaType.APPLICATION_JSON)
+//    fun getEndpoint(@PathParam("id") id: String): EndpointOutput {
+//        val endpoint = getEndpointUseCase.execute(id)
+//        return entityToDto(endpoint)
+//    }
+//
+//    @POST
+//    @Produces(MediaType.APPLICATION_JSON)
+//    fun createEndpoint(endpointInput: EndpointInput): EndpointOutput {
+//        val endpoint =  createEndpointUseCase.execute(dtoToEntity(endpointInput))
+//        return entityToDto(endpoint)
+//    }
 
     private fun dtoToEntity(e: EndpointInput): Endpoint {
         // TODO create a function in Endpoint to create

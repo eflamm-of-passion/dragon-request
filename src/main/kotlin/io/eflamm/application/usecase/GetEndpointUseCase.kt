@@ -1,4 +1,4 @@
-package io.eflamm.domain.usecase
+package io.eflamm.application.usecase
 
 import io.eflamm.domain.model.Endpoint
 import io.eflamm.domain.model.endpoint.Id
