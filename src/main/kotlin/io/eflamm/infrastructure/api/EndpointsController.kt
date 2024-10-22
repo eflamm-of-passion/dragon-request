@@ -14,8 +14,7 @@ import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 
 @Path("/endpoints")
-class EndpointsController() {
-//    class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, private val createEndpointUseCase: CreateEndpointUseCase) {
+class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, private val createEndpointUseCase: CreateEndpointUseCase) {
 
     @GET
     @Produces(MediaType.TEXT_PLAIN)
@@ -23,14 +22,14 @@ class EndpointsController() {
         return "Hello from Quarkus REST!!!!!!!!!!"
     }
 
-//    @GET
-//    @Path("/{id}")
-//    @Produces(MediaType.APPLICATION_JSON)
-//    fun getEndpoint(@PathParam("id") id: String): EndpointOutput {
-//        val endpoint = getEndpointUseCase.execute(id)
-//        return entityToDto(endpoint)
-//    }
-//
+    @GET
+    @Path("/{id}")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getEndpoint(@PathParam("id") id: String): EndpointOutput {
+        val endpoint = getEndpointUseCase.execute(id)
+        return entityToDto(endpoint)
+    }
+
 //    @POST
 //    @Produces(MediaType.APPLICATION_JSON)
 //    fun createEndpoint(endpointInput: EndpointInput): EndpointOutput {
