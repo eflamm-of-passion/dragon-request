@@ -1,4 +1,4 @@
-package io.eflamm.infrastructure.di
+package io.eflamm.infrastructure.cdi
 
 import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointUseCase

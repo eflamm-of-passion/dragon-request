@@ -6,5 +6,4 @@
 
 ## TODO
 
-- make the dependency injection work
-- create integration tests
+- save into database
