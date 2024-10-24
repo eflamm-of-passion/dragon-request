@@ -3,12 +3,15 @@ package io.eflamm.domain.model.endpoint;
 enum class Protocol(val value: String) {
     HTTP("http"), HTTPS("https");
 
+    companion object {
+        fun fromString(value: String): Protocol? {
+            // TODO check that
+            return entries.find { it.name.equals(value, ignoreCase = true) }
+        }
+    }
+
     fun get(): String {
         return value
     }
 
-    fun set(valueAsString : String): Protocol {
-        // TODO check that
-        return Protocol.valueOf(valueAsString)
-    }
 }
