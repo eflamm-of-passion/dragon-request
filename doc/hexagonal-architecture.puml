@@ -1,0 +1,98 @@
+@startuml
+
+package application.usecase {
+    class CreateEndpointUseCase {
+        - endpointRepository: EndpointRepository
+    }
+    class GetEndpointUseCase {
+        - endpointRepository: EndpointRepository
+    }
+}
+
+package domain.model {
+    class Endpoint {
+       - id: Id
+       - protocol: Protocol
+       - domain: DomainName
+       - port: Port
+       - path: Path
+       - queryParameters: QueryParameters
+    }
+}
+
+package domain.repository {
+    interface EndpointRepository {
+        + getEndpoint(id: Id): Endpoint?
+        + createEndpoint(endpoint: Endpoint): Endpoint
+        + updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint
+        + deleteEndpoint(id: Id)
+    }
+}
+
+package 1-infrastructure {
+    package api {
+        class EndpointsController {
+                + getEndpoint(id: String) : Response<EndpointOutput>
+                + createEndpoint(endpointInput: EndpointInput): Response<EndpointOutput>
+            }
+    }
+    class EndpointOutput {
+        + id: String?,
+        + protocol: String,
+        + domain: String,
+        + port: Int,
+        + path: String,
+        + queryParameters: String
+    }
+    class EndpointInput {
+        + protocol: String,
+        + domain: String,
+        + port: Int,
+        + path: String,
+        + queryParameters: String
+    }
+}
+
+package 2-infrastructure {
+    package cdi {
+        class ApplicationDepencyInjector {
+            - repository: EndpointRepository
+            + instantiateController(): EndpointsController
+            + instantiateGetEndpointUseCase(): GetEndpointUseCase
+            + instantiateCreateEndpointUseCase(): CreateEndpointUseCase
+        }
+    }
+}
+
+package 3-infrastructure {
+    package persistence {
+        class MockEndpointRepository implements domain.repository.EndpointRepository {
+            + getEndpoint(id: Id): Endpoint?
+            + createEndpoint(endpoint: Endpoint): Endpoint
+            + updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint
+            + deleteEndpoint(id: Id)
+        }
+        class SqliteRepository implements domain.repository.EndpointRepository {
+            + connect()
+            + disconnect()
+            + getEndpoint(id: Id): Endpoint?
+            + createEndpoint(endpoint: Endpoint): Endpoint
+            + updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint
+            + deleteEndpoint(id: Id)
+        }
+    }
+}
+
+'application
+CreateEndpointUseCase -right-> domain.repository.EndpointRepository
+GetEndpointUseCase -right-> domain.repository.EndpointRepository
+CreateEndpointUseCase -up-> Endpoint
+GetEndpointUseCase -up-> Endpoint
+
+'infrastructure
+EndpointsController -right-> EndpointOutput
+EndpointsController -down-> EndpointInput
+EndpointsController -up-> CreateEndpointUseCase
+EndpointsController -up-> GetEndpointUseCase
+
+@enduml
