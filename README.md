@@ -6,4 +6,5 @@
 
 ## TODO
 
-- save into database
+- make a class diagram
+- make some tests for the SQLite repository

@@ -24,7 +24,10 @@ class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, pr
     @Produces(MediaType.APPLICATION_JSON)
     fun getEndpoint(@PathParam("id") id: String): Response {
         val endpoint = getEndpointUseCase.execute(id)
-        return Response.ok(entityToDto(endpoint)).build()
+        return if(endpoint != null)
+            Response.ok(entityToDto(endpoint)).build()
+        else
+            Response.status(404).build()
     }
 
     @POST

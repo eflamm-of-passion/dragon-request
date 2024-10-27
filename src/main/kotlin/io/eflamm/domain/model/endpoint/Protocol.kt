@@ -4,9 +4,9 @@ enum class Protocol(val value: String) {
     HTTP("http"), HTTPS("https");
 
     companion object {
-        fun fromString(value: String): Protocol? {
+        fun fromString(value: String): Protocol {
             // TODO check that
-            return entries.find { it.name.equals(value, ignoreCase = true) }
+            return entries.find { it.name.equals(value, ignoreCase = true) } ?: HTTP
         }
     }
 

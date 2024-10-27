@@ -6,12 +6,15 @@ import io.eflamm.domain.repository.EndpointRepository
 import io.eflamm.infrastructure.api.EndpointsController
 import io.eflamm.infrastructure.persistence.SqliteRepository
 import jakarta.annotation.PreDestroy
+import jakarta.annotation.Priority
 import jakarta.enterprise.context.ApplicationScoped
+import jakarta.enterprise.inject.Alternative
 import jakarta.enterprise.inject.Produces
 
-
+@Alternative
+@Priority(1)
 @ApplicationScoped
-class ApplicationDepencyInjector {
+class TestApplicationDependencyInjector {
 
     private lateinit var repository: EndpointRepository
 

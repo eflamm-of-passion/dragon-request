@@ -8,7 +8,7 @@ class Id private constructor(private val identifier: UUID) {
         fun create(): Id {
             return Id(UUID.randomUUID())
         }
-        fun createFromString(idFromString: String): Id {
+        fun fromString(idFromString: String): Id {
             // TODO check it is an uuid
             return Id(UUID.fromString(idFromString))
         }
