@@ -3,15 +3,15 @@ package io.eflamm.infrastructure.cdi.properties
 import org.junit.jupiter.api.Test
 import org.assertj.core.api.Assertions.assertThat
 
-class KeyValueFilePropertyProviderTest {
+class ApplicationPropertyProviderTest {
 
     @Test
     fun `GIVEN the provider is created WHEN get the property THEN returns the property value`() {
         // given
-        val provider = KeyValueFilePropertyProvider()
+        val provider = ApplicationPropertyProvider("application-dev.properties")
         // we suppose that the property do exist in the gradle.properties file
         val propertyKey = "database.sqlite.file-path"
-        val expectedPropertyValue = "sqlite-database.db"
+        val expectedPropertyValue = "sqlite-database.db.bak"
 
         // when
         val actualPropertyValue = provider.get(propertyKey)

@@ -4,6 +4,8 @@ import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointUseCase
 import io.eflamm.domain.repository.EndpointRepository
 import io.eflamm.infrastructure.api.EndpointsController
+import io.eflamm.infrastructure.cdi.properties.ApplicationPropertyProvider
+import io.eflamm.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.infrastructure.persistence.SqliteRepository
 import jakarta.annotation.PreDestroy
 import jakarta.enterprise.context.ApplicationScoped
@@ -22,22 +24,26 @@ class ApplicationDepencyInjector {
 
     @Produces
     fun instantiateGetEndpointUseCase(): GetEndpointUseCase {
-        val endpointRepository = getRepositoryImpl()
+        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
         return GetEndpointUseCase(endpointRepository)
     }
 
     @Produces
     fun instantiateCreateEndpointUseCase(): CreateEndpointUseCase {
-        val endpointRepository = getRepositoryImpl()
+        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
         return CreateEndpointUseCase(endpointRepository)
     }
 
-    private fun getRepositoryImpl(): EndpointRepository {
+    private fun getRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
         if (!this::repository.isInitialized) {
-            repository = SqliteRepository()
+            repository = SqliteRepository(propertyProvider.get("database.sqlite.file-path"))
             (repository as SqliteRepository).connect()
         }
         return repository
+    }
+
+    private fun getPropertyProviderImpl(): PropertyProvider {
+        return ApplicationPropertyProvider("application-dev.properties")
     }
 
     @PreDestroy

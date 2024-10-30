@@ -13,5 +13,4 @@ enum class Protocol(val value: String) {
     fun get(): String {
         return value
     }
-
 }

@@ -3,7 +3,6 @@ package io.eflamm.infrastructure.persistence
 import io.eflamm.domain.model.Endpoint
 import io.eflamm.domain.model.endpoint.*
 import io.eflamm.domain.repository.EndpointRepository
-import io.eflamm.infrastructure.cdi.properties.KeyValueFilePropertyProvider
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement
@@ -11,10 +10,9 @@ import java.sql.ResultSet
 import java.sql.SQLException
 import java.util.UUID
 
-class SqliteRepository : EndpointRepository {
+class SqliteRepository(private val databaseFilePath: String) : EndpointRepository {
 
     object Constants {
-        const val FILE_PATH_PROPERTY = "database.sqlite.file-path"
         const val SQLITE_DRIVER = "jdbc:sqlite:"
     }
 
@@ -22,18 +20,12 @@ class SqliteRepository : EndpointRepository {
 
     fun connect() {
         try {
-            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + getDatabaseFilePath())
+            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath)
             initDatabase()
             println("Connected to database")
         } catch (e: SQLException) {
             println("Failed to connect to database : ${e.message}")
         }
-    }
-
-    private fun getDatabaseFilePath(): String {
-        val filePath = KeyValueFilePropertyProvider().get(Constants.FILE_PATH_PROPERTY)
-        return javaClass.classLoader.getResource(filePath)?.path
-            ?: throw IllegalStateException("Database file not found")
     }
 
     private fun initDatabase() {
@@ -47,8 +39,9 @@ class SqliteRepository : EndpointRepository {
                 queryParameters TEXT NOT NULL
             )
         """.trimIndent()
-
-        executeQuery(query)
+        connection.createStatement().use { statement ->
+            statement.execute(query)
+        }
     }
 
     fun disconnect() {
@@ -57,6 +50,24 @@ class SqliteRepository : EndpointRepository {
             println("Disconnected to database")
         }
 
+    }
+
+    fun clearDatabase() {
+        val query = """
+            DROP TABLE IF EXISTS endpoints
+        """.trimIndent()
+        connection.createStatement().use { statement ->
+            statement.execute(query)
+        }
+    }
+
+    fun cleanDatabase() {
+        val query = """
+            DELETE FROM endpoints
+        """.trimIndent()
+        connection.createStatement().use { statement ->
+            statement.execute(query)
+        }
     }
 
     override fun getEndpoint(id: Id): Endpoint? {
@@ -72,9 +83,10 @@ class SqliteRepository : EndpointRepository {
             INSERT INTO endpoints (id, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?)
         """.trimIndent()
 
+        // FIXME should be in the domain probably
         val uuidOfCreatedEndpoint = UUID.randomUUID().toString()
 
-        executeCreateOrUpdateQuery(query) { statement ->
+        executeChangeQuery(query) { statement ->
             statement.setString(1, uuidOfCreatedEndpoint)
             statement.setString(2, endpoint.protocol.get())
             statement.setString(3, endpoint.domain.get())
@@ -91,7 +103,13 @@ class SqliteRepository : EndpointRepository {
     }
 
     override fun deleteEndpoint(id: Id) {
-        TODO("Not yet implemented")
+        val query = """
+            DELETE FROM endpoints WHERE id = ?
+        """.trimIndent()
+
+        executeChangeQuery(query) { statement ->
+            statement.setString(1, id.get())
+        }
     }
 
     private fun createEndpointFromResultSet(resultSet: ResultSet): Endpoint {
@@ -100,16 +118,9 @@ class SqliteRepository : EndpointRepository {
             Protocol.fromString(resultSet.getString("protocol")),
             DomainName(resultSet.getString("domain")),
             Port(resultSet.getInt("port")),
-            Path.fromString(resultSet.getString("path")),
-            QueryParameters(emptyMap())
+            Path.create(), // FIXME
+            QueryParameters.create() // FIXME
         )
-    }
-
-    private fun executeQuery(query: String) {
-        checkConnection()
-        connection.createStatement().use { statement ->
-            statement.executeQuery(query)
-        }
     }
 
     private fun executeSearchQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit): Endpoint? {
@@ -125,7 +136,7 @@ class SqliteRepository : EndpointRepository {
         }
     }
 
-    private fun executeCreateOrUpdateQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit) {
+    private fun executeChangeQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit) {
         checkConnection()
         connection.prepareStatement(query).use { statement ->
             setRequestParameters.invoke(statement)
