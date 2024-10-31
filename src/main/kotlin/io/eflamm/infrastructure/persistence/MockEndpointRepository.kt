@@ -32,7 +32,7 @@ class MockEndpointRepository: EndpointRepository {
         return createdEndpoint
     }
 
-    override fun updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint {
+    override fun updateEndpoint(endpointUpdated: Endpoint): Endpoint {
         TODO("Not yet implemented")
     }
 

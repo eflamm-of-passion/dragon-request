@@ -1,5 +1,9 @@
 package io.eflamm.infrastructure.persistence
 
+import io.eflamm.domain.model.Endpoint
+import io.eflamm.domain.model.endpoint.DomainName
+import io.eflamm.domain.model.endpoint.Port
+import io.eflamm.domain.model.endpoint.Protocol
 import io.eflamm.infrastructure.EndpointUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
@@ -43,7 +47,24 @@ class SqliteRepositoryTest {
 
     @Test
     fun `GIVEN an endpoint in the database WHEN updating the endpoint THEN the endpoint is updated in database`() {
-        fail("Not yet implemented")
+        // given
+        val earlierCreatedEndpoint = repository.createEndpoint(EndpointUtils.createEndpointWithoutId())
+        val endpointToUpdate = Endpoint(
+            earlierCreatedEndpoint.id,
+            Protocol.HTTPS,
+            DomainName("other-domain.com"),
+            Port(8080),
+            earlierCreatedEndpoint.path,
+            earlierCreatedEndpoint.queryParameters
+        )
+
+        // when
+        val endpointUpdated = repository.updateEndpoint(endpointToUpdate)
+
+        // then
+        assertThat(endpointUpdated)
+            .usingRecursiveComparison()
+            .isEqualTo(endpointToUpdate)
     }
 
     @Test

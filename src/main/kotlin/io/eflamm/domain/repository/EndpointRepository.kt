@@ -6,6 +6,6 @@ import io.eflamm.domain.model.endpoint.Id
 interface EndpointRepository {
     fun getEndpoint(id: Id): Endpoint?
     fun createEndpoint(endpoint: Endpoint): Endpoint
-    fun updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint
+    fun updateEndpoint(endpointUpdated: Endpoint): Endpoint
     fun deleteEndpoint(id: Id)
 }

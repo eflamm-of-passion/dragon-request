@@ -98,8 +98,27 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
         return getEndpoint(Id.fromString(uuidOfCreatedEndpoint))!!
     }
 
-    override fun updateEndpoint(idOfEndpointToUpdate: Id, endpointUpdated: Endpoint): Endpoint {
-        TODO("Not yet implemented")
+    override fun updateEndpoint(endpointUpdated: Endpoint): Endpoint {
+        val query = """
+            UPDATE endpoints SET 
+                protocol = ?, 
+                domain = ?, 
+                port = ?, 
+                path = ?, 
+                queryParameters = ?
+            WHERE id = ?
+        """.trimIndent()
+
+        executeChangeQuery(query) { statement ->
+            statement.setString(1, endpointUpdated.protocol.get())
+            statement.setString(2, endpointUpdated.domain.get())
+            statement.setInt(3, endpointUpdated.port.get())
+            statement.setString(4, endpointUpdated.path.aggregate())
+            statement.setString(5, endpointUpdated.queryParameters.aggregate())
+            statement.setString(6, endpointUpdated.id!!.get())
+        }
+
+        return getEndpoint(endpointUpdated.id!!)!!
     }
 
     override fun deleteEndpoint(id: Id) {
