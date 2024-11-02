@@ -8,7 +8,6 @@ import io.eflamm.domain.model.endpoint.Protocol
 import io.eflamm.infrastructure.EndpointUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
-import java.sql.SQLException
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SqliteRepositoryTest {

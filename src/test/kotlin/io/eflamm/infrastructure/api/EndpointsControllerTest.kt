@@ -1,9 +1,10 @@
 package io.eflamm.infrastructure.api
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
+import io.restassured.http.ContentType
+import jakarta.ws.rs.core.Response
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.jupiter.api.Test
-import java.util.*
 
 @QuarkusTest
 class EndpointsControllerTest {
@@ -30,28 +31,92 @@ class EndpointsControllerTest {
             .post(Constants.ENDPOINTS_URL)
             .then()
             .statusCode(201)
-//            .body("id", equalTo(MockEndpointRepository.CREATED_ENDPOINT_UUID))
             .body("protocol", equalTo("http"))
             .body("domain", equalTo("acme.org"))
             .body("port", equalTo   (80))
             .body("path", equalTo(""))
             .body("queryParameters", equalTo(""))
+            .extract().response()
     }
 
-//    @Test
+    @Test
     fun getEndpointTest() {
-        val expectedId = UUID.fromString("a48cd2ec-3b61-4908-b3ec-add927cd9e09").toString()
+        val expectedId = createTestEndpoint()
 
         RestAssured.given()
-            .get(Constants.ENDPOINTS_URL + expectedId)
+            .basePath(Constants.ENDPOINTS_URL)
+            .get(expectedId)
             .then()
             .statusCode(200)
-//            .body("id", equalTo(expectedId))
+            .body("id", equalTo(expectedId))
             .body("protocol", equalTo("http"))
             .body("domain", equalTo("acme.org"))
             .body("port", equalTo(80))
             .body("path", equalTo(""))
             .body("queryParameters", equalTo(""))
+    }
+
+    @Test
+    fun updateEndpointTest() {
+        val expectedId = createTestEndpoint()
+        val body = """
+            {
+                "id": "$expectedId",
+                "protocol": "https",
+                "domain": "example.org",
+                "port": 8080,
+                "path": "/",
+                "queryParameters": ""
+            }
+        """
+
+        RestAssured.given()
+            .header("Content-Type", "application/json")
+            .body(body)
+            .put(Constants.ENDPOINTS_URL)
+            .then()
+            .statusCode(200)
+            .body("id", equalTo(expectedId))
+            .body("protocol", equalTo("https"))
+            .body("domain", equalTo("example.org"))
+            .body("port", equalTo   (8080))
+            .body("path", equalTo(""))
+            .body("queryParameters", equalTo(""))
+            .extract().response()
+    }
+
+    @Test
+    fun deleteEndpointTest() {
+        val expectedId = createTestEndpoint()
+
+        RestAssured.given()
+            .basePath(Constants.ENDPOINTS_URL)
+            .delete(expectedId)
+            .then()
+            .statusCode(200)
+    }
+
+    private fun createTestEndpoint(): String? {
+        val endpointJson = """
+            {
+                "protocol": "http",
+                "domain": "acme.org",
+                "port": 80,
+                "path": "/",
+                "queryParameters": ""
+            }
+        """
+
+        val response = RestAssured.given()
+            .contentType(ContentType.JSON)
+            .body(endpointJson)
+            .post(Constants.ENDPOINTS_URL)
+            .then()
+            .statusCode(Response.Status.CREATED.statusCode)
+            .extract()
+            .response()
+
+        return response.jsonPath().getString("id")
     }
 
 }

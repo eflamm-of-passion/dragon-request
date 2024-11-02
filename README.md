@@ -6,8 +6,9 @@
 
 ## TODO
 
-- update delete in the controller
+- check if it is RESTful
 - add a logger
+- handle the query params and path
 
 ## Architecture
 

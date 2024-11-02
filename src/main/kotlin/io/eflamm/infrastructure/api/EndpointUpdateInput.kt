@@ -5,7 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 // TODO enable one string constructor
 data class EndpointUpdateInput @JsonCreator constructor(
-    @JsonProperty("protocol") val id: String,
+    @JsonProperty("id") val id: String,
     @JsonProperty("protocol") val protocol: String,
     @JsonProperty("domain") val domain: String,
     @JsonProperty("port") val port: Int,

@@ -14,7 +14,6 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
 
     object Constants {
         const val SQLITE_DRIVER = "jdbc:sqlite:"
-        const val SQLITE_READ_ONLY_MODE = "?mode=ro"
     }
 
     private lateinit var connection: Connection
@@ -189,7 +188,8 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
 
     fun connect() {
         try {
-            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath + Constants.SQLITE_READ_ONLY_MODE)
+            Class.forName("org.sqlite.JDBC")  // Explicitly load the SQLite driver
+            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath)
             initDatabase()
             println("Connected to database")
         } catch (e: SQLException) {

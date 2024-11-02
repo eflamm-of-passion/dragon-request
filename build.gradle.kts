@@ -21,7 +21,7 @@ dependencies {
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-kotlin")
 
-    implementation("org.xerial:sqlite-jdbc:3.36.0.3")
+    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
