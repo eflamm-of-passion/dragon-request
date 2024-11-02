@@ -11,7 +11,7 @@ class ApplicationPropertyProviderTest {
         val provider = ApplicationPropertyProvider("application-dev.properties")
         // we suppose that the property do exist in the gradle.properties file
         val propertyKey = "database.sqlite.file-path"
-        val expectedPropertyValue = "sqlite-database.db.bak"
+        val expectedPropertyValue = "sqlite-database.db"
 
         // when
         val actualPropertyValue = provider.get(propertyKey)

@@ -14,17 +14,128 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
 
     object Constants {
         const val SQLITE_DRIVER = "jdbc:sqlite:"
+        const val SQLITE_READ_ONLY_MODE = "?mode=ro"
     }
 
     private lateinit var connection: Connection
 
-    fun connect() {
+    override fun getEndpoint(id: Id): Result<Endpoint> {
         try {
-            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath)
-            initDatabase()
-            println("Connected to database")
+            val query = """
+                SELECT * FROM endpoints WHERE id = ?
+            """.trimIndent()
+
+            val endpoint = executeSearchQuery(query) { statement -> statement.setString(1, id.get()) }
+            return if (endpoint != null) {
+                Result.success(endpoint)
+            } else {
+                Result.failure(NoSuchElementException("No endpoint exist with the id ${id.get()}"))
+            }
         } catch (e: SQLException) {
-            println("Failed to connect to database : ${e.message}")
+            return Result.failure(e)
+        }
+    }
+
+    override fun createEndpoint(endpoint: Endpoint): Result<Endpoint> {
+        try {
+            val query = """
+                INSERT INTO endpoints (id, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?)
+            """.trimIndent()
+
+            executeChangeQuery(query) { statement ->
+                statement.setString(1, endpoint.id.get())
+                statement.setString(2, endpoint.protocol.get())
+                statement.setString(3, endpoint.domain.get())
+                statement.setInt(4, endpoint.port.get())
+                statement.setString(5, endpoint.path.aggregate())
+                statement.setString(6, endpoint.queryParameters.aggregate())
+            }
+
+            return getEndpoint(Id.fromString(endpoint.id.get()))
+        } catch (e: SQLException) {
+            return Result.failure(e)
+        }
+    }
+
+    override fun updateEndpoint(endpointUpdated: Endpoint): Result<Endpoint> {
+        try {
+            val query = """
+                UPDATE endpoints SET 
+                    protocol = ?, 
+                    domain = ?, 
+                    port = ?, 
+                    path = ?, 
+                    queryParameters = ?
+                WHERE id = ?
+            """.trimIndent()
+
+            executeChangeQuery(query) { statement ->
+                statement.setString(1, endpointUpdated.protocol.get())
+                statement.setString(2, endpointUpdated.domain.get())
+                statement.setInt(3, endpointUpdated.port.get())
+                statement.setString(4, endpointUpdated.path.aggregate())
+                statement.setString(5, endpointUpdated.queryParameters.aggregate())
+                statement.setString(6, endpointUpdated.id.get())
+            }
+
+            return getEndpoint(endpointUpdated.id)
+        } catch (e: SQLException) {
+            return Result.failure(e)
+        }
+    }
+
+    override fun deleteEndpoint(id: Id): Result<Unit> {
+        try {
+            val query = """
+                DELETE FROM endpoints WHERE id = ?
+            """.trimIndent()
+
+            val numberOfRowsDeleted = executeChangeQuery(query) { statement ->
+                statement.setString(1, id.get())
+            }
+
+            return if(numberOfRowsDeleted > 0) {
+                Result.success(Unit)
+            } else {
+                Result.failure(NoSuchElementException())
+            }
+        } catch (e: SQLException) {
+            return Result.failure(e)
+        }
+    }
+
+    private fun createEndpointFromResultSet(resultSet: ResultSet): Endpoint {
+        return Endpoint(
+            Id.fromString(resultSet.getString("id")),
+            Protocol.fromString(resultSet.getString("protocol")),
+            DomainName(resultSet.getString("domain")),
+            Port(resultSet.getInt("port")),
+            Path.create(), // FIXME
+            QueryParameters.create() // FIXME
+        )
+    }
+
+    private fun executeSearchQuery(
+        query: String,
+        setRequestParameters: (statement: PreparedStatement) -> Unit
+    ): Endpoint? {
+        checkConnection()
+        connection.prepareStatement(query).use { statement ->
+            setRequestParameters.invoke(statement)
+            val resultSet = statement.executeQuery()
+            return if (resultSet.next()) {
+                createEndpointFromResultSet(resultSet)
+            } else {
+                null
+            }
+        }
+    }
+
+    private fun executeChangeQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit): Int {
+        checkConnection()
+        connection.prepareStatement(query).use { statement ->
+            setRequestParameters.invoke(statement)
+            return statement.executeUpdate() // TODO handle the result
         }
     }
 
@@ -45,7 +156,7 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
     }
 
     fun disconnect() {
-        if(this::connection.isInitialized) {
+        if (this::connection.isInitialized) {
             connection.close()
             println("Disconnected to database")
         }
@@ -70,102 +181,20 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
         }
     }
 
-    override fun getEndpoint(id: Id): Endpoint? {
-        val query = """
-            SELECT * FROM endpoints WHERE id = ?
-        """.trimIndent()
-
-        return executeSearchQuery(query) { statement -> statement.setString(1, id.get())}
-    }
-
-    override fun createEndpoint(endpoint: Endpoint): Endpoint {
-        val query = """
-            INSERT INTO endpoints (id, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?)
-        """.trimIndent()
-
-        // FIXME should be in the domain probably
-        val uuidOfCreatedEndpoint = UUID.randomUUID().toString()
-
-        executeChangeQuery(query) { statement ->
-            statement.setString(1, uuidOfCreatedEndpoint)
-            statement.setString(2, endpoint.protocol.get())
-            statement.setString(3, endpoint.domain.get())
-            statement.setInt(4, endpoint.port.get())
-            statement.setString(5, endpoint.path.aggregate())
-            statement.setString(6, endpoint.queryParameters.aggregate())
-        }
-
-        return getEndpoint(Id.fromString(uuidOfCreatedEndpoint))!!
-    }
-
-    override fun updateEndpoint(endpointUpdated: Endpoint): Endpoint {
-        val query = """
-            UPDATE endpoints SET 
-                protocol = ?, 
-                domain = ?, 
-                port = ?, 
-                path = ?, 
-                queryParameters = ?
-            WHERE id = ?
-        """.trimIndent()
-
-        executeChangeQuery(query) { statement ->
-            statement.setString(1, endpointUpdated.protocol.get())
-            statement.setString(2, endpointUpdated.domain.get())
-            statement.setInt(3, endpointUpdated.port.get())
-            statement.setString(4, endpointUpdated.path.aggregate())
-            statement.setString(5, endpointUpdated.queryParameters.aggregate())
-            statement.setString(6, endpointUpdated.id!!.get())
-        }
-
-        return getEndpoint(endpointUpdated.id!!)!!
-    }
-
-    override fun deleteEndpoint(id: Id) {
-        val query = """
-            DELETE FROM endpoints WHERE id = ?
-        """.trimIndent()
-
-        executeChangeQuery(query) { statement ->
-            statement.setString(1, id.get())
-        }
-    }
-
-    private fun createEndpointFromResultSet(resultSet: ResultSet): Endpoint {
-        return Endpoint(
-            Id.fromString(resultSet.getString("id")),
-            Protocol.fromString(resultSet.getString("protocol")),
-            DomainName(resultSet.getString("domain")),
-            Port(resultSet.getInt("port")),
-            Path.create(), // FIXME
-            QueryParameters.create() // FIXME
-        )
-    }
-
-    private fun executeSearchQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit): Endpoint? {
-        checkConnection()
-        connection.prepareStatement(query).use { statement ->
-            setRequestParameters.invoke(statement)
-            val resultSet = statement.executeQuery()
-            return if (resultSet.next()) {
-                createEndpointFromResultSet(resultSet)
-            } else {
-                null
-            }
-        }
-    }
-
-    private fun executeChangeQuery(query: String, setRequestParameters: (statement: PreparedStatement) -> Unit) {
-        checkConnection()
-        connection.prepareStatement(query).use { statement ->
-            setRequestParameters.invoke(statement)
-            statement.executeUpdate() // TODO handle the result
-        }
-    }
-
     private fun checkConnection() {
         if (!this::connection.isInitialized) {
-           connect()
+            connect()
         }
     }
+
+    fun connect() {
+        try {
+            connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath + Constants.SQLITE_READ_ONLY_MODE)
+            initDatabase()
+            println("Connected to database")
+        } catch (e: SQLException) {
+            throw e
+        }
+    }
+
 }

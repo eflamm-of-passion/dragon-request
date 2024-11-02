@@ -34,7 +34,7 @@ class EndpointsControllerTest {
             .body("protocol", equalTo("http"))
             .body("domain", equalTo("acme.org"))
             .body("port", equalTo   (80))
-            .body("path", equalTo("/"))
+            .body("path", equalTo(""))
             .body("queryParameters", equalTo(""))
     }
 

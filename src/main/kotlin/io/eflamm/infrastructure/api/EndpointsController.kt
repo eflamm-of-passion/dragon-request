@@ -3,15 +3,9 @@ package io.eflamm.infrastructure.api
 import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointUseCase
 import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.DomainName
-import io.eflamm.domain.model.endpoint.Port
-import io.eflamm.domain.model.endpoint.Protocol
-import io.eflamm.domain.model.endpoint.QueryParameters
-import jakarta.ws.rs.GET
-import jakarta.ws.rs.POST
+import io.eflamm.domain.model.endpoint.*
+import jakarta.ws.rs.*
 import jakarta.ws.rs.Path
-import jakarta.ws.rs.PathParam
-import jakarta.ws.rs.Produces
 import jakarta.ws.rs.core.MediaType
 import jakarta.ws.rs.core.Response
 import java.net.URI
@@ -23,24 +17,30 @@ class EndpointsController(private val getEndpointUseCase: GetEndpointUseCase, pr
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     fun getEndpoint(@PathParam("id") id: String): Response {
-        val endpoint = getEndpointUseCase.execute(id)
-        return if(endpoint != null)
-            Response.ok(entityToDto(endpoint)).build()
+        val getEndpointResult = getEndpointUseCase.execute(id)
+        return if(getEndpointResult.isSuccess)
+            Response.ok(entityToDto(getEndpointResult.getOrNull()!!)).build()
         else
             Response.status(404).build()
     }
 
     @POST
     @Produces(MediaType.APPLICATION_JSON)
-    fun createEndpoint(endpointInput: EndpointInput): Response {
-        val createdEndpoint =  createEndpointUseCase.execute(dtoToEntity(endpointInput))
-        val locationUri = URI.create("/endpoints/${createdEndpoint.id}")
-        return Response.created(locationUri).entity(entityToDto(createdEndpoint)).build()
+    fun createEndpoint(endpointInput: EndpointCreateInput): Response {
+        val createEndpointResult =  createEndpointUseCase.execute(dtoToEntity(endpointInput))
+        val createdEndpoint = createEndpointResult.getOrNull()
+        if(createEndpointResult.isSuccess && createdEndpoint != null) {
+                val locationUri = URI.create("/endpoints/${createdEndpoint.id}")
+                return Response.created(locationUri).entity(entityToDto(createdEndpoint)).build()
+        } else {
+            return Response.serverError().build()
+        }
     }
 
-    private fun dtoToEntity(e: EndpointInput): Endpoint {
+    private fun dtoToEntity(e: EndpointCreateInput): Endpoint {
         // TODO create a function in Endpoint to create
         return  Endpoint(
+            id = Id.create(),
             protocol = Protocol.fromString(e.protocol) ?: Protocol.HTTP, // TODO clean that
             domain = DomainName(e.domain),
             port = Port( e.port),

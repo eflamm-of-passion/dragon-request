@@ -5,9 +5,9 @@ import io.eflamm.domain.model.endpoint.*
 
 abstract class EndpointUtils {
     companion object {
-        fun createEndpointWithoutId(): Endpoint {
+        fun createEndpointWitRandomId(): Endpoint {
             return Endpoint(
-                null,
+                Id.create(),
                 Protocol.HTTP,
                 DomainName("acme.org"),
                 Port(80),

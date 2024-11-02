@@ -39,7 +39,7 @@ class TestApplicationDependencyInjector {
 
     private fun getRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
         if (!this::repository.isInitialized) {
-            repository = SqliteRepository(propertyProvider.get(":memory:"))
+            repository = SqliteRepository(":memory:")
             (repository as SqliteRepository).connect()
         }
         return repository

@@ -9,18 +9,18 @@ class MockEndpointRepository: EndpointRepository {
         const val CREATED_ENDPOINT_UUID = "04cce78b-095c-4f07-af3c-8489d923b923"
     }
 
-    override fun getEndpoint(id: Id): Endpoint {
-        return Endpoint(
+    override fun getEndpoint(id: Id): Result<Endpoint> {
+        return Result.success(Endpoint(
             id = Id.fromString(id.get()),
             Protocol.HTTP,
             DomainName("acme.org"),
             Port(80),
             Path.create(),
             QueryParameters.create()
-        )
+        ))
     }
 
-    override fun createEndpoint(endpoint: Endpoint): Endpoint {
+    override fun createEndpoint(endpoint: Endpoint): Result<Endpoint> {
         val createdEndpoint = Endpoint(
             id = Id.fromString(CREATED_ENDPOINT_UUID),
             endpoint.protocol,
@@ -29,14 +29,14 @@ class MockEndpointRepository: EndpointRepository {
             endpoint.path,
             endpoint.queryParameters
         )
-        return createdEndpoint
+        return Result.success(createdEndpoint)
     }
 
-    override fun updateEndpoint(endpointUpdated: Endpoint): Endpoint {
+    override fun updateEndpoint(endpointUpdated: Endpoint): Result<Endpoint> {
         TODO("Not yet implemented")
     }
 
-    override fun deleteEndpoint(id: Id) {
+    override fun deleteEndpoint(id: Id): Result<Unit> {
         TODO("Not yet implemented")
     }
 
