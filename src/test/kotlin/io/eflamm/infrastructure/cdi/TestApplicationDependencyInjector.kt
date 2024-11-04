@@ -4,10 +4,12 @@ import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.DeleteEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
+import io.eflamm.domain.monitoring.Logger
 import io.eflamm.domain.repository.EndpointRepository
 import io.eflamm.infrastructure.api.EndpointsController
 import io.eflamm.infrastructure.cdi.properties.ApplicationPropertyProvider
 import io.eflamm.infrastructure.cdi.properties.PropertyProvider
+import io.eflamm.infrastructure.logger.SLF4JLogger
 import io.eflamm.infrastructure.persistence.SqliteRepository
 import jakarta.annotation.PreDestroy
 import jakarta.annotation.Priority
@@ -28,35 +30,36 @@ class TestApplicationDependencyInjector {
             instantiateGetEndpointUseCase(),
             instantiateCreateEndpointUseCase(),
             instantiateUpdateEndpointUseCase(),
-            instantiateDeleteEndpointUseCase()
+            instantiateDeleteEndpointUseCase(),
+            instantiateLogger()
         )
     }
 
     @Produces
     fun instantiateGetEndpointUseCase(): GetEndpointUseCase {
-        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
+        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
         return GetEndpointUseCase(endpointRepository)
     }
 
     @Produces
     fun instantiateCreateEndpointUseCase(): CreateEndpointUseCase {
-        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
+        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
         return CreateEndpointUseCase(endpointRepository)
     }
 
     @Produces
     fun instantiateUpdateEndpointUseCase(): UpdateEndpointUseCase {
-        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
+        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
         return UpdateEndpointUseCase(endpointRepository)
     }
 
     @Produces
     fun instantiateDeleteEndpointUseCase(): DeleteEndpointUseCase {
-        val endpointRepository = getRepositoryImpl(getPropertyProviderImpl())
+        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
         return DeleteEndpointUseCase(endpointRepository)
     }
 
-    private fun getRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
+    private fun instantiateRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
         if (!this::repository.isInitialized) {
             repository = SqliteRepository(":memory:")
             (repository as SqliteRepository).connect()
@@ -64,8 +67,13 @@ class TestApplicationDependencyInjector {
         return repository
     }
 
-    private fun getPropertyProviderImpl(): PropertyProvider {
+    private fun instantiatePropertyProviderImpl(): PropertyProvider {
         return ApplicationPropertyProvider("application-dev.properties")
+    }
+
+    @Produces
+    fun instantiateLogger(): Logger {
+        return SLF4JLogger()
     }
 
     @PreDestroy

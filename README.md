@@ -6,9 +6,8 @@
 
 ## TODO
 
-- check if it is RESTful
-- add a logger
 - handle the query params and path
+- fix the logging
 
 ## Architecture
 

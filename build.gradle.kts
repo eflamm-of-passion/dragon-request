@@ -21,14 +21,15 @@ dependencies {
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-kotlin")
 
-    implementation("org.xerial:sqlite-jdbc:3.41.2.2")
+    implementation("org.xerial:sqlite-jdbc:3.47.0.0")
+    implementation("org.slf4j:slf4j-api:2.0.16")
+    implementation("ch.qos.logback:logback-classic:1.5.12")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
 
     testImplementation(kotlin("test"))
-    testImplementation("org.assertj:assertj-core:3.24.2")
-//    implementation(kotlin("stdlib-jdk8"))
+    testImplementation("org.assertj:assertj-core:3.26.3")
 }
 
 tasks.test {
