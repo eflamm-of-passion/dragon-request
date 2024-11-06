@@ -1,5 +1,6 @@
 package io.eflamm.infrastructure.api
 
+import io.eflamm.application.mapper.EndpointMapper
 import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.DeleteEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointUseCase
@@ -30,7 +31,7 @@ class EndpointsController(
         val getEndpointResult = getEndpointUseCase.execute(id)
         return if(getEndpointResult.isSuccess) {
             logger.info("response GET /$id - 200 OK")
-            Response.ok(entityToDto(getEndpointResult.getOrNull()!!)).build()
+            Response.ok(EndpointMapper.businessToDto(getEndpointResult.getOrNull()!!)).build()
         } else {
             // TODO handle server error
             // TODO return error message
@@ -43,12 +44,12 @@ class EndpointsController(
     @Produces(MediaType.APPLICATION_JSON)
     fun createEndpoint(endpointInput: EndpointCreateInput): Response {
         logger.info("request POST / - $endpointInput")
-        val createEndpointResult =  createEndpointUseCase.execute(dtoToEntity(endpointInput))
+        val createEndpointResult =  createEndpointUseCase.execute(EndpointMapper.dtoToBusiness(endpointInput))
         val createdEndpoint = createEndpointResult.getOrNull()
         if(createEndpointResult.isSuccess && createdEndpoint != null) {
                 logger.info("response POST / - 201 created - $createdEndpoint")
                 val locationUri = URI.create("/endpoints/${createdEndpoint.id}")
-                return Response.created(locationUri).entity(entityToDto(createdEndpoint)).build()
+                return Response.created(locationUri).entity(EndpointMapper.businessToDto(createdEndpoint)).build()
         } else {
             // TODO return error message
             logger.info("response POST / - 500 server error")
@@ -60,11 +61,11 @@ class EndpointsController(
     @Produces(MediaType.APPLICATION_JSON)
     fun updateEndpoint(endpointInput: EndpointUpdateInput): Response {
         logger.info("request PUT / - $endpointInput")
-        val updateEndpointResult =  updateEndpointUseCase.execute(dtoToEntity(endpointInput))
+        val updateEndpointResult =  updateEndpointUseCase.execute(EndpointMapper.dtoToBusiness(endpointInput))
         val updatedEndpoint = updateEndpointResult.getOrNull()
         if(updateEndpointResult.isSuccess && updatedEndpoint != null) {
             logger.info("response PUT / - 200 OK - $updatedEndpoint")
-            return Response.ok().entity(entityToDto(updatedEndpoint)).build()
+            return Response.ok().entity(EndpointMapper.businessToDto(updatedEndpoint)).build()
 
         } else {
             // TODO return error message
@@ -87,39 +88,5 @@ class EndpointsController(
             logger.info("response DELETE /${id} - 404 not found")
             Response.status(404).build()
         }
-    }
-
-    private fun dtoToEntity(e: EndpointCreateInput): Endpoint {
-        // TODO create a function in Endpoint to create
-        return  Endpoint(
-            id = Id.create(),
-            protocol = Protocol.fromString(e.protocol), // TODO clean that
-            domain = DomainName(e.domain),
-            port = Port( e.port),
-            path = io.eflamm.domain.model.endpoint.Path(emptyList()),
-            queryParameters = QueryParameters(emptyMap()))
-    }
-
-    private fun dtoToEntity(e: EndpointUpdateInput): Endpoint {
-        // TODO create a function in Endpoint to create
-        return  Endpoint(
-            id = Id.fromString(e.id),
-            protocol = Protocol.fromString(e.protocol),
-            domain = DomainName(e.domain),
-            port = Port( e.port),
-            path = io.eflamm.domain.model.endpoint.Path(emptyList()),
-            queryParameters = QueryParameters(emptyMap()))
-    }
-
-    private fun entityToDto(endpointEntity: Endpoint): EndpointOutput {
-        // TODO clean that
-        return EndpointOutput(
-            endpointEntity.id.get(),
-            endpointEntity.protocol.get(),
-            endpointEntity.domain.get(),
-            endpointEntity.port.get(),
-            endpointEntity.path.aggregate(),
-            endpointEntity.queryParameters.aggregate()
-        )
     }
 }

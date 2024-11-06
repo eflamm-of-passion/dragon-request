@@ -9,8 +9,9 @@ class QueryParameters(val queryParameters: Map<String, String>) {
     fun aggregate(): String {
         var aggregatedQueryParams = ""
         if(queryParameters.isNotEmpty()) {
-            aggregatedQueryParams = queryParameters.map { queryParam -> queryParam.key + "=" + queryParam.value }
-                .joinToString { "&" }.dropLast(1)
+            aggregatedQueryParams = "?" + queryParameters
+                .map { queryParam -> queryParam.key + "=" + queryParam.value }
+                .joinToString("&")
         }
         return aggregatedQueryParams
     }

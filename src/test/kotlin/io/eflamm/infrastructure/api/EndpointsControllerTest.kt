@@ -17,11 +17,7 @@ class EndpointsControllerTest {
     fun createEndpointTest() {
         val body = """
             {
-                "protocol": "http",
-                "domain": "acme.org",
-                "port": 80,
-                "path": "/",
-                "queryParameters": ""
+                "url": "http://acme.org/path?param=foo"
             }
         """
 
@@ -31,11 +27,7 @@ class EndpointsControllerTest {
             .post(Constants.ENDPOINTS_URL)
             .then()
             .statusCode(201)
-            .body("protocol", equalTo("http"))
-            .body("domain", equalTo("acme.org"))
-            .body("port", equalTo   (80))
-            .body("path", equalTo(""))
-            .body("queryParameters", equalTo(""))
+            .body("url", equalTo("http://acme.org/path?param=foo"))
             .extract().response()
     }
 
@@ -49,11 +41,7 @@ class EndpointsControllerTest {
             .then()
             .statusCode(200)
             .body("id", equalTo(expectedId))
-            .body("protocol", equalTo("http"))
-            .body("domain", equalTo("acme.org"))
-            .body("port", equalTo(80))
-            .body("path", equalTo(""))
-            .body("queryParameters", equalTo(""))
+            .body("url", equalTo("http://acme.org/path?param=foo"))
     }
 
     @Test
@@ -62,11 +50,7 @@ class EndpointsControllerTest {
         val body = """
             {
                 "id": "$expectedId",
-                "protocol": "https",
-                "domain": "example.org",
-                "port": 8080,
-                "path": "/",
-                "queryParameters": ""
+                "url": "https://example.org:9091"
             }
         """
 
@@ -77,11 +61,7 @@ class EndpointsControllerTest {
             .then()
             .statusCode(200)
             .body("id", equalTo(expectedId))
-            .body("protocol", equalTo("https"))
-            .body("domain", equalTo("example.org"))
-            .body("port", equalTo   (8080))
-            .body("path", equalTo(""))
-            .body("queryParameters", equalTo(""))
+            .body("url", equalTo("https://example.org:9091"))
             .extract().response()
     }
 
@@ -99,11 +79,7 @@ class EndpointsControllerTest {
     private fun createTestEndpoint(): String? {
         val endpointJson = """
             {
-                "protocol": "http",
-                "domain": "acme.org",
-                "port": 80,
-                "path": "/",
-                "queryParameters": ""
+                "url": "http://acme.org/path?param=foo"
             }
         """
 

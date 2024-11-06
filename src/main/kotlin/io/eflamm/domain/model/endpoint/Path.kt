@@ -14,6 +14,10 @@ class Path(val pathSegments: List<String>) {
         return pathSegments
     }
     fun aggregate(): String {
-        return pathSegments.joinToString { "/" }
+        return if(pathSegments.isNotEmpty()) {
+           "/" + pathSegments.joinToString ("/" )
+        } else {
+            ""
+        }
     }
 }

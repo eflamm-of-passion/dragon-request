@@ -6,8 +6,9 @@
 
 ## TODO
 
-- handle the query params and path
+- fix the persistence of the query params and path
 - fix the logging
+- handle the errors in the controller
 
 ## Architecture
 
