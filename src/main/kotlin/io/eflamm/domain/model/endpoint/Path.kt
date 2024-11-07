@@ -7,7 +7,7 @@ class Path(val pathSegments: List<String>) {
             return Path(emptyList())
         }
         fun fromString(aggregatedPath: String): Path {
-            return Path(aggregatedPath.split("/"))
+            return Path(aggregatedPath.split("/").filter { s -> s.isNotEmpty() }.toList())
         }
     }
     fun get(): List<String> {

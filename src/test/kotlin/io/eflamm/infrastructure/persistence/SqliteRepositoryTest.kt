@@ -64,7 +64,7 @@ class SqliteRepositoryTest {
 
     @Test
     @Disabled
-    fun `GIVEN a repository that cannot connect WHEN get another endpoint THEN returns failure`() {
+    fun `GIVEN a repository that cannot connect WHEN get endpoint THEN returns failure`() {
         // TODO make it work
     }
 

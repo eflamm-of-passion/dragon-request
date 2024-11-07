@@ -66,15 +66,19 @@ class EndpointMapper {
         }
 
         private fun parsePathFromUri(uri: URI): Path {
-            return Path(uri.path.split("/").filter { s -> s.isNotEmpty() }.toList())
+            return if(uri.path == null || uri.path.isEmpty()) {
+                Path.create()
+            } else {
+                Path.fromString(uri.path)
+            }
         }
 
         private fun parseQueryParametersFromUri(uri: URI): QueryParameters {
-            return QueryParameters(uri.query?.split("&")
-                ?.associate {
-                    val (key, value) = it.split("=")
-                    key to value
-                } ?: emptyMap())
+            return if(uri.query == null || uri.query.isEmpty()) {
+                QueryParameters.create()
+            } else {
+                QueryParameters.fromString(uri.query)
+            }
         }
     }
 }

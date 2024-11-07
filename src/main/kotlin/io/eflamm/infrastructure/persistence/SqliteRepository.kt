@@ -109,8 +109,8 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
             Protocol.fromString(resultSet.getString("protocol")),
             DomainName(resultSet.getString("domain")),
             Port(resultSet.getInt("port")),
-            Path.create(), // FIXME
-            QueryParameters.create() // FIXME
+            Path.fromString(resultSet.getString("path")),
+            QueryParameters.fromString(resultSet.getString("queryParameters"))
         )
     }
 

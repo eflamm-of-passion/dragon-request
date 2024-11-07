@@ -11,8 +11,8 @@ abstract class EndpointUtils {
                 Protocol.HTTP,
                 DomainName("acme.org"),
                 Port(80),
-                Path.create(),
-                QueryParameters.create()
+                Path(listOf("path", "more")),
+                QueryParameters(mapOf("one" to "foo", "two" to "bar"))
             )
         }
     }
