@@ -24,6 +24,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.47.0.0")
     implementation("org.slf4j:slf4j-api:2.0.16")
     implementation("ch.qos.logback:logback-classic:1.5.12")
+    implementation("com.google.code.gson:gson:2.11.0")
 
     testImplementation("io.quarkus:quarkus-junit5")
     testImplementation("io.rest-assured:rest-assured")
