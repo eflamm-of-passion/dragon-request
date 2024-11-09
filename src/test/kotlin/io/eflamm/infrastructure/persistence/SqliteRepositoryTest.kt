@@ -1,5 +1,7 @@
 package io.eflamm.infrastructure.persistence
 
+import io.eflamm.domain.exception.EndpointException
+import io.eflamm.domain.exception.ErrorType
 import io.eflamm.domain.model.Endpoint
 import io.eflamm.domain.model.endpoint.DomainName
 import io.eflamm.domain.model.endpoint.Id
@@ -13,6 +15,8 @@ import org.junit.jupiter.api.*
 class SqliteRepositoryTest {
 
     private lateinit var repository: SqliteRepository
+
+    // TODO test with an SQLException
 
     @BeforeAll
     fun setupDatabase() {
@@ -59,7 +63,8 @@ class SqliteRepositoryTest {
 
         // then
         assertThat((getEndpointResult.isFailure)).isTrue()
-        assertThat(getEndpointResult.exceptionOrNull()).isInstanceOf(NoSuchElementException::class.java)
+        assertThat(getEndpointResult.exceptionOrNull()).isInstanceOf(EndpointException::class.java)
+        assertThat((getEndpointResult.exceptionOrNull() as EndpointException).type).isEqualTo(ErrorType.ENTITY_NOT_FOUND)
     }
 
     @Test
@@ -93,7 +98,7 @@ class SqliteRepositoryTest {
     }
 
     @Test
-    fun `GIVEN an endpoint in the database WHEN updating an endpoint that do not exist THEN it throws an exception`() {
+    fun `GIVEN an endpoint in the database WHEN updating an endpoint that do not exist THEN it returns failure`() {
         // given
         val earlierCreatedEndpoint = repository.createEndpoint(EndpointUtils.createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
@@ -110,7 +115,8 @@ class SqliteRepositoryTest {
 
         // then
         assertThat((endpointUpdatedResult.isFailure)).isTrue()
-        assertThat(endpointUpdatedResult.exceptionOrNull()).isInstanceOf(NoSuchElementException::class.java)
+        assertThat(endpointUpdatedResult.exceptionOrNull()).isInstanceOf(EndpointException::class.java)
+        assertThat((endpointUpdatedResult.exceptionOrNull() as EndpointException).type).isEqualTo(ErrorType.ENTITY_NOT_FOUND)
     }
 
     @Test
@@ -139,6 +145,6 @@ class SqliteRepositoryTest {
 
         // then
         assertThat(endpointDeleteResult.isFailure).isTrue()
-        assertThat(endpointDeleteResult.exceptionOrNull()).isInstanceOf(NoSuchElementException::class.java)
+        assertThat(endpointDeleteResult.exceptionOrNull()).isInstanceOf(EndpointException::class.java)
     }
 }

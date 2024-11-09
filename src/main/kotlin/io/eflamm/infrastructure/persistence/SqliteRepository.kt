@@ -1,5 +1,7 @@
 package io.eflamm.infrastructure.persistence
 
+import io.eflamm.domain.exception.EndpointException
+import io.eflamm.domain.exception.ErrorType
 import io.eflamm.domain.model.Endpoint
 import io.eflamm.domain.model.endpoint.*
 import io.eflamm.domain.repository.EndpointRepository
@@ -8,7 +10,6 @@ import java.sql.DriverManager
 import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
-import java.util.UUID
 
 class SqliteRepository(private val databaseFilePath: String) : EndpointRepository {
 
@@ -20,26 +21,20 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
 
     override fun getEndpoint(id: Id): Result<Endpoint> {
         try {
-            val query = """
-                SELECT * FROM endpoints WHERE id = ?
-            """.trimIndent()
-
-            val endpoint = executeSearchQuery(query) { statement -> statement.setString(1, id.get()) }
+            val endpoint = executeSearchQuery("SELECT * FROM endpoints WHERE id = ?") { statement -> statement.setString(1, id.get()) }
             return if (endpoint != null) {
                 Result.success(endpoint)
             } else {
-                Result.failure(NoSuchElementException("No endpoint exist with the id ${id.get()}"))
+                Result.failure(EndpointException(ErrorType.ENTITY_NOT_FOUND, "No endpoint exists with the id ${id.get()}"))
             }
         } catch (e: SQLException) {
-            return Result.failure(e)
+            return Result.failure(EndpointException(ErrorType.TECHNICAL_ERROR, "Something went wrong with the repository", e))
         }
     }
 
     override fun createEndpoint(endpoint: Endpoint): Result<Endpoint> {
         try {
-            val query = """
-                INSERT INTO endpoints (id, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?)
-            """.trimIndent()
+            val query = "INSERT INTO endpoints (id, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?)"
 
             executeChangeQuery(query) { statement ->
                 statement.setString(1, endpoint.id.get())
@@ -85,18 +80,14 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
 
     override fun deleteEndpoint(id: Id): Result<Unit> {
         try {
-            val query = """
-                DELETE FROM endpoints WHERE id = ?
-            """.trimIndent()
-
-            val numberOfRowsDeleted = executeChangeQuery(query) { statement ->
+            val numberOfRowsDeleted = executeChangeQuery("DELETE FROM endpoints WHERE id = ?") { statement ->
                 statement.setString(1, id.get())
             }
 
             return if(numberOfRowsDeleted > 0) {
                 Result.success(Unit)
             } else {
-                Result.failure(NoSuchElementException())
+                Result.failure(EndpointException(ErrorType.ENTITY_NOT_FOUND, "No endpoint exists with the id ${id.get()}"))
             }
         } catch (e: SQLException) {
             return Result.failure(e)
@@ -163,20 +154,14 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
     }
 
     fun clearDatabase() {
-        val query = """
-            DROP TABLE IF EXISTS endpoints
-        """.trimIndent()
         connection.createStatement().use { statement ->
-            statement.execute(query)
+            statement.execute("DROP TABLE IF EXISTS endpoints")
         }
     }
 
     fun cleanDatabase() {
-        val query = """
-            DELETE FROM endpoints
-        """.trimIndent()
         connection.createStatement().use { statement ->
-            statement.execute(query)
+            statement.execute("DELETE FROM endpoints")
         }
     }
 
