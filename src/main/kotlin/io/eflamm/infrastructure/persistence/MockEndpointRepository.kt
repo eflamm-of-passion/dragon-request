@@ -9,6 +9,10 @@ class MockEndpointRepository: EndpointRepository {
         const val CREATED_ENDPOINT_UUID = "04cce78b-095c-4f07-af3c-8489d923b923"
     }
 
+    override fun getEndpoints(): Result<List<Endpoint>> {
+        TODO("Not yet implemented")
+    }
+
     override fun getEndpoint(id: Id): Result<Endpoint> {
         return Result.success(Endpoint(
             id = Id.fromString(id.get()),

@@ -37,6 +37,10 @@ class EndpointMapper {
             )
         }
 
+        fun businessToDto(endpoints: List<Endpoint>): List<EndpointOutput> {
+            return endpoints.map { businessToDto(it) }
+        }
+
         fun businessToDto(endpoint: Endpoint): EndpointOutput {
             var aggregatedUrl = endpoint.protocol.value
             aggregatedUrl += PROTOCOL_TO_DOMAIN_SEPARATOR

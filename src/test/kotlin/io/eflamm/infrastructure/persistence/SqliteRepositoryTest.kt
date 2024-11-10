@@ -48,8 +48,44 @@ class SqliteRepositoryTest {
         assertThat((createdEndpointResult.isSuccess)).isTrue()
         assertThat(endpointToCreate)
             .usingRecursiveComparison()
-            .ignoringFields("id")
             .isEqualTo(createdEndpoint)
+    }
+
+    @Test
+    fun `GIVEN two endpoints WHEN getting endpoints THEN returns a list with both endpoints`() {
+        // given
+        val endpointOneToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointTwoToCreate = EndpointUtils.createEndpointWitRandomId()
+
+        // when
+        repository.createEndpoint(endpointOneToCreate)
+        repository.createEndpoint(endpointTwoToCreate)
+        val getEndpointResult = repository.getEndpoints()
+
+        // then
+        assertThat((getEndpointResult.isSuccess)).isTrue()
+        assertThat(getEndpointResult.getOrNull()?.get(0))
+            .usingRecursiveComparison()
+            .isEqualTo(endpointOneToCreate)
+        assertThat(getEndpointResult.getOrNull()?.get(1))
+            .usingRecursiveComparison()
+            .isEqualTo(endpointTwoToCreate)
+    }
+
+    @Test
+    fun `GIVEN no endpoints WHEN get endpoints THEN returns an empty list`() {
+        // given
+        val endpointOneToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointTwoToCreate = EndpointUtils.createEndpointWitRandomId()
+
+        // when
+        repository.createEndpoint(endpointOneToCreate)
+        repository.createEndpoint(endpointTwoToCreate)
+        val getEndpointResult = repository.getEndpoints()
+
+        // then
+        assertThat((getEndpointResult.isSuccess)).isTrue()
+        assertThat(getEndpointResult.getOrNull()?.isEmpty())
     }
 
     @Test

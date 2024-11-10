@@ -2,7 +2,8 @@ package io.eflamm.infrastructure.cdi
 
 import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.DeleteEndpointUseCase
-import io.eflamm.application.usecase.GetEndpointUseCase
+import io.eflamm.application.usecase.GetEndpointsUseCase
+import io.eflamm.application.usecase.GetSingleEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
 import io.eflamm.domain.monitoring.Logger
 import io.eflamm.domain.repository.EndpointRepository
@@ -27,7 +28,8 @@ class TestApplicationDependencyInjector {
     @Produces
     fun instantiateController(): EndpointsController {
         return EndpointsController(
-            instantiateGetEndpointUseCase(),
+            instantiateGetEndpointsUseCase(),
+            instantiateSingleGetEndpointUseCase(),
             instantiateCreateEndpointUseCase(),
             instantiateUpdateEndpointUseCase(),
             instantiateDeleteEndpointUseCase(),
@@ -36,9 +38,15 @@ class TestApplicationDependencyInjector {
     }
 
     @Produces
-    fun instantiateGetEndpointUseCase(): GetEndpointUseCase {
+    fun instantiateGetEndpointsUseCase(): GetEndpointsUseCase {
         val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
-        return GetEndpointUseCase(endpointRepository)
+        return GetEndpointsUseCase(endpointRepository)
+    }
+
+    @Produces
+    fun instantiateSingleGetEndpointUseCase(): GetSingleEndpointUseCase {
+        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+        return GetSingleEndpointUseCase(endpointRepository)
     }
 
     @Produces

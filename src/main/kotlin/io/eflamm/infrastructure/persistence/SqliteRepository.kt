@@ -18,17 +18,25 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
     }
 
     private lateinit var connection: Connection
+    override fun getEndpoints(): Result<List<Endpoint>> {
+        try {
+            val endpoints = executeSearchQuery("SELECT * FROM endpoints") { _ -> { } }
+            return Result.success(endpoints)
+        } catch (e: SQLException) {
+            return Result.failure(EndpointException(ErrorType.TECHNICAL_ERROR, "Something went wrong with the database.", e))
+        }
+    }
 
     override fun getEndpoint(id: Id): Result<Endpoint> {
         try {
-            val endpoint = executeSearchQuery("SELECT * FROM endpoints WHERE id = ?") { statement -> statement.setString(1, id.get()) }
-            return if (endpoint != null) {
-                Result.success(endpoint)
+            val endpoints = executeSearchQuery("SELECT * FROM endpoints WHERE id = ?") { statement -> statement.setString(1, id.get()) }
+            return if (endpoints.isNotEmpty()) {
+                Result.success(endpoints.first())
             } else {
                 Result.failure(EndpointException(ErrorType.ENTITY_NOT_FOUND, "No endpoint exists with the id ${id.get()}"))
             }
         } catch (e: SQLException) {
-            return Result.failure(EndpointException(ErrorType.TECHNICAL_ERROR, "Something went wrong with the repository", e))
+            return Result.failure(EndpointException(ErrorType.TECHNICAL_ERROR, "Something went wrong with the database.", e))
         }
     }
 
@@ -87,7 +95,7 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
             return if(numberOfRowsDeleted > 0) {
                 Result.success(Unit)
             } else {
-                Result.failure(EndpointException(ErrorType.ENTITY_NOT_FOUND, "No endpoint exists with the id ${id.get()}"))
+                Result.failure(EndpointException(ErrorType.ENTITY_NOT_FOUND, "No endpoint exists with the id ${id.get()}."))
             }
         } catch (e: SQLException) {
             return Result.failure(e)
@@ -108,16 +116,16 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
     private fun executeSearchQuery(
         query: String,
         setRequestParameters: (statement: PreparedStatement) -> Unit
-    ): Endpoint? {
+    ): List<Endpoint> {
         checkConnection()
         connection.prepareStatement(query).use { statement ->
             setRequestParameters.invoke(statement)
             val resultSet = statement.executeQuery()
-            return if (resultSet.next()) {
-                createEndpointFromResultSet(resultSet)
-            } else {
-                null
+            val endpoints = mutableListOf<Endpoint>()
+            while (resultSet.next()) {
+                endpoints.add(createEndpointFromResultSet(resultSet))
             }
+            return endpoints
         }
     }
 

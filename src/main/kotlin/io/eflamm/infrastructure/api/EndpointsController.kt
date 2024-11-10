@@ -4,7 +4,8 @@ import io.eflamm.application.mapper.EndpointMapper
 import io.eflamm.application.mapper.LoggerUtils
 import io.eflamm.application.usecase.CreateEndpointUseCase
 import io.eflamm.application.usecase.DeleteEndpointUseCase
-import io.eflamm.application.usecase.GetEndpointUseCase
+import io.eflamm.application.usecase.GetEndpointsUseCase
+import io.eflamm.application.usecase.GetSingleEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
 import io.eflamm.domain.exception.EndpointException
 import io.eflamm.domain.exception.ErrorType
@@ -18,7 +19,8 @@ import java.net.URI
 
 @Path("/endpoints")
 class EndpointsController(
-    private val getEndpointUseCase: GetEndpointUseCase,
+    private val getEndpointsUseCase: GetEndpointsUseCase,
+    private val getSingleEndpointUseCase: GetSingleEndpointUseCase,
     private val createEndpointUseCase: CreateEndpointUseCase,
     private val updateEndpointUseCase: UpdateEndpointUseCase,
     private val deleteEndpointUseCase: DeleteEndpointUseCase,
@@ -26,14 +28,47 @@ class EndpointsController(
 ) {
     object Constants {
         val ENDPOINT_BASE_PATH = "/endpoints"
+        val DEFAULT_FAILURE_MESSAGE = "Should not happen."
     }
+
+    @GET
+    @Path("/")
+    @Produces(MediaType.APPLICATION_JSON)
+    fun getEndpoints(): Response {
+        logger.info("request GET ${Constants.ENDPOINT_BASE_PATH}")
+        val getEndpointsResult = getEndpointsUseCase.execute()
+        return if (getEndpointsResult.isSuccess) {
+            handleSuccessGetEndpoints(getEndpointsResult)
+        } else {
+            handleFailureGetEndpoints(getEndpointsResult.exceptionOrNull() as EndpointException)
+        }
+    }
+
+    private fun handleSuccessGetEndpoints(getEndpointResult: Result<List<Endpoint>>): Response {
+        val endpoints = getEndpointResult.getOrNull()!!
+        logger.info("response GET ${Constants.ENDPOINT_BASE_PATH} - 200 OK")
+        return Response.ok(EndpointMapper.businessToDto(endpoints)).build()
+    }
+
+    private fun handleFailureGetEndpoints(e: EndpointException) =
+        when(e.type) {
+            ErrorType.TECHNICAL_ERROR -> {
+                logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
+                Response.serverError().entity(e.message).build()
+            }
+            else -> {
+                logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
+                logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
+                Response.serverError().build()
+            }
+        }
 
     @GET
     @Path("/{id}")
     @Produces(MediaType.APPLICATION_JSON)
     fun getEndpoint(@PathParam("id") id: String): Response {
         logger.info("request GET ${Constants.ENDPOINT_BASE_PATH}/${id}")
-        val getEndpointResult = getEndpointUseCase.execute(id)
+        val getEndpointResult = getSingleEndpointUseCase.execute(id)
         return if (getEndpointResult.isSuccess) {
             handleSuccessGetEndpoint(id, getEndpointResult)
         } else {
@@ -87,7 +122,7 @@ class EndpointsController(
             }
             else -> {
                 logger.warn("response POST ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
-                logger.error("should not happen")
+                logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 Response.serverError().entity(e.message).build()
             }
         }
@@ -166,7 +201,7 @@ class EndpointsController(
             }
             else -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
-                logger.error("should not happen")
+                logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 Response.serverError().build()
             }
         }

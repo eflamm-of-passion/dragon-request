@@ -53,6 +53,22 @@ class EndpointsControllerIntegrationTest {
     }
 
     @Test
+    fun `GIVEN two existing endpoints WHEN get THEN return 200 with the list of endpoints`() {
+        val firstExpectedId = createTestEndpoint()
+        val secondExpectedId = createTestEndpoint()
+
+        RestAssured.given()
+            .basePath(Constants.ENDPOINTS_BASE_URL)
+            .then()
+            .statusCode(200)
+            .body("size()", equalTo(2))
+            .body("[0].id", equalTo(firstExpectedId))
+            .body("[0].url", equalTo("http://acme.org/path?param=foo"))
+            .body("[1].id", equalTo(secondExpectedId))
+            .body("[1].url", equalTo("http://acme.org/path?param=foo"))
+    }
+
+    @Test
     fun `GIVEN an existing endpoint id WHEN get THEN return 200 with the endpoint`() {
         val expectedId = createTestEndpoint()
 

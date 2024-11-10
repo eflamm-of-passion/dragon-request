@@ -6,7 +6,7 @@
 
 ## TODO
 
-- handle the errors in the controller
+- integrate a frontend
 
 ## Architecture
 
