@@ -1,4 +1,4 @@
-package io.eflamm.infrastructure.persistence
+package io.eflamm.dragonrequest.repository.sqlite
 
 import io.eflamm.dragonrequest.domain.exception.EndpointException
 import io.eflamm.dragonrequest.domain.exception.ErrorType

@@ -15,3 +15,4 @@ plugins {
 }
 rootProject.name = "dragon-request"
 include("domain")
+include("repository-sqlite")

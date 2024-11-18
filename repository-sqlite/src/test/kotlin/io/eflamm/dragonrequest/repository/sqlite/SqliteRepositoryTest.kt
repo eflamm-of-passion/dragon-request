@@ -1,13 +1,9 @@
-package io.eflamm.infrastructure.persistence
+package io.eflamm.dragonrequest.repository.sqlite
 
 import io.eflamm.dragonrequest.domain.exception.EndpointException
 import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.Endpoint
-import io.eflamm.dragonrequest.domain.model.endpoint.DomainName
-import io.eflamm.dragonrequest.domain.model.endpoint.Id
-import io.eflamm.dragonrequest.domain.model.endpoint.Port
-import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
-import io.eflamm.infrastructure.EndpointUtils
+import io.eflamm.dragonrequest.domain.model.endpoint.*
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
@@ -17,6 +13,17 @@ class SqliteRepositoryTest {
     private lateinit var repository: SqliteRepository
 
     // TODO test with an SQLException
+
+    private fun createEndpointWitRandomId(): Endpoint {
+        return Endpoint(
+            Id.create(),
+            Protocol.HTTP,
+            DomainName("acme.org"),
+            Port(80),
+            Path(listOf("path", "more")),
+            QueryParameters(mapOf("one" to "foo", "two" to "bar"))
+        )
+    }
 
     @BeforeAll
     fun setupDatabase() {
@@ -38,7 +45,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN an endpoint WHEN create AND get this endpoint THEN returns the created endpoint `() {
         // given
-        val endpointToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointToCreate = createEndpointWitRandomId()
 
         // when
         val createdEndpointResult = repository.createEndpoint(endpointToCreate)
@@ -54,8 +61,8 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN two endpoints WHEN getting endpoints THEN returns a list with both endpoints`() {
         // given
-        val endpointOneToCreate = EndpointUtils.createEndpointWitRandomId()
-        val endpointTwoToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointOneToCreate = createEndpointWitRandomId()
+        val endpointTwoToCreate = createEndpointWitRandomId()
 
         // when
         repository.createEndpoint(endpointOneToCreate)
@@ -75,8 +82,8 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN no endpoints WHEN get endpoints THEN returns an empty list`() {
         // given
-        val endpointOneToCreate = EndpointUtils.createEndpointWitRandomId()
-        val endpointTwoToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointOneToCreate = createEndpointWitRandomId()
+        val endpointTwoToCreate = createEndpointWitRandomId()
 
         // when
         repository.createEndpoint(endpointOneToCreate)
@@ -91,7 +98,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN and endpoint WHEN get another endpoint THEN returns failure`() {
         // given
-        val endpointToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointToCreate = createEndpointWitRandomId()
 
         // when
         repository.createEndpoint(endpointToCreate)
@@ -112,7 +119,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN an endpoint in the database WHEN updating the endpoint THEN the endpoint is updated in database`() {
         // given
-        val earlierCreatedEndpoint = repository.createEndpoint(EndpointUtils.createEndpointWitRandomId()).getOrNull()!!
+        val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             earlierCreatedEndpoint.id,
             Protocol.HTTPS,
@@ -136,7 +143,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN an endpoint in the database WHEN updating an endpoint that do not exist THEN it returns failure`() {
         // given
-        val earlierCreatedEndpoint = repository.createEndpoint(EndpointUtils.createEndpointWitRandomId()).getOrNull()!!
+        val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             Id.create(),
             Protocol.HTTPS,
@@ -158,7 +165,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN an endpoint in the database WHEN deleting an endpoint THEN the endpoint deleted in database`() {
         // given
-        val endpointToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointToCreate = createEndpointWitRandomId()
         val endpointToDelete = repository.createEndpoint(endpointToCreate).getOrNull()!!
 
         // when
@@ -173,7 +180,7 @@ class SqliteRepositoryTest {
     @Test
     fun `GIVEN an endpoint in the database WHEN deleting another endpoint THEN it throws an exception`() {
         // given
-        val endpointToCreate = EndpointUtils.createEndpointWitRandomId()
+        val endpointToCreate = createEndpointWitRandomId()
         repository.createEndpoint(endpointToCreate).getOrNull()!!
 
         // when

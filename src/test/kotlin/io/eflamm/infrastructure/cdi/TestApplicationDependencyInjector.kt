@@ -7,11 +7,11 @@ import io.eflamm.application.usecase.GetSingleEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository
+import io.eflamm.dragonrequest.repository.sqlite.SqliteRepository
 import io.eflamm.infrastructure.api.EndpointsController
 import io.eflamm.infrastructure.cdi.properties.ApplicationPropertyProvider
 import io.eflamm.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.infrastructure.logger.SLF4JLogger
-import io.eflamm.infrastructure.persistence.SqliteRepository
 import jakarta.annotation.PreDestroy
 import jakarta.annotation.Priority
 import jakarta.enterprise.context.ApplicationScoped
