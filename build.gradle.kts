@@ -3,7 +3,7 @@ plugins {
     id("io.quarkus")
 }
 
-group = "io.eflamm"
+group = "io.eflamm.dragonrequest"
 version = "1.0-SNAPSHOT"
 
 repositories {
@@ -15,6 +15,8 @@ val quarkusPlatformArtifactId: String by project
 val quarkusPlatformVersion: String by project
 
 dependencies {
+    implementation(project(":domain"))
+
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
     implementation("io.quarkus:quarkus-rest")
     implementation("io.quarkus:quarkus-rest-jackson")

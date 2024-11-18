@@ -1,4 +1,4 @@
-package io.eflamm.domain.model.endpoint
+package io.eflamm.dragonrequest.domain.model.endpoint
 
 class Path(val pathSegments: List<String>) {
     // TODO handle empty path

@@ -1,12 +1,12 @@
 package io.eflamm.infrastructure.api
-import io.eflamm.domain.model.endpoint.Id
+
+import io.eflamm.dragonrequest.domain.model.endpoint.Id
 import io.quarkus.test.junit.QuarkusTest
 import io.restassured.RestAssured
 import io.restassured.http.ContentType
 import jakarta.ws.rs.core.Response
 import org.hamcrest.CoreMatchers.equalTo
 import org.junit.jupiter.api.Test
-import java.util.*
 
 @QuarkusTest
 class EndpointsControllerIntegrationTest {

@@ -1,12 +1,12 @@
-package io.eflamm.domain.model.endpoint
+package io.eflamm.dragonrequest.domain.model.endpoint
 
 class QueryParameters(val queryParameters: Map<String, String>) {
     companion object {
-        fun create(): QueryParameters {
-            return QueryParameters(emptyMap())
+        fun create(): io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters {
+            return io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters(emptyMap())
         }
-        fun fromString(aggregatedFromString: String): QueryParameters {
-            return QueryParameters(
+        fun fromString(aggregatedFromString: String): io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters {
+            return io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters(
                 aggregatedFromString
                     .removePrefix("?")
                     .split("&")

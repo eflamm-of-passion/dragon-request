@@ -1,4 +1,4 @@
-package io.eflamm.domain.model.endpoint;
+package io.eflamm.dragonrequest.domain.model.endpoint;
 
 enum class Protocol(val value: String) {
     HTTP("http"), HTTPS("https");

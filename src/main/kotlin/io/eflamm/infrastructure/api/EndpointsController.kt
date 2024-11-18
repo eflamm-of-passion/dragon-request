@@ -7,10 +7,9 @@ import io.eflamm.application.usecase.DeleteEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointsUseCase
 import io.eflamm.application.usecase.GetSingleEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
-import io.eflamm.domain.exception.EndpointException
-import io.eflamm.domain.exception.ErrorType
-import io.eflamm.domain.monitoring.Logger
-import io.eflamm.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.exception.EndpointException
+import io.eflamm.dragonrequest.domain.exception.ErrorType
+import io.eflamm.dragonrequest.domain.model.Endpoint
 import jakarta.ws.rs.*
 import jakarta.ws.rs.Path
 import jakarta.ws.rs.core.MediaType
@@ -24,7 +23,7 @@ class EndpointsController(
     private val createEndpointUseCase: CreateEndpointUseCase,
     private val updateEndpointUseCase: UpdateEndpointUseCase,
     private val deleteEndpointUseCase: DeleteEndpointUseCase,
-    private val logger: Logger
+    private val logger: io.eflamm.dragonrequest.domain.monitoring.Logger
 ) {
     object Constants {
         val ENDPOINT_BASE_PATH = "/endpoints"

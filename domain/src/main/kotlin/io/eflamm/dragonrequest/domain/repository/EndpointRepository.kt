@@ -1,7 +1,7 @@
-package io.eflamm.domain.repository
+package io.eflamm.dragonrequest.domain.repository
 
-import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.Id
+import io.eflamm.dragonrequest.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.endpoint.Id
 
 interface EndpointRepository {
     fun getEndpoints(): Result<List<Endpoint>>

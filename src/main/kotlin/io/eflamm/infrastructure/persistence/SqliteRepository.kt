@@ -1,10 +1,10 @@
 package io.eflamm.infrastructure.persistence
 
-import io.eflamm.domain.exception.EndpointException
-import io.eflamm.domain.exception.ErrorType
-import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.*
-import io.eflamm.domain.repository.EndpointRepository
+import io.eflamm.dragonrequest.domain.exception.EndpointException
+import io.eflamm.dragonrequest.domain.exception.ErrorType
+import io.eflamm.dragonrequest.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.endpoint.*
+import io.eflamm.dragonrequest.domain.repository.EndpointRepository
 import java.sql.Connection
 import java.sql.DriverManager
 import java.sql.PreparedStatement

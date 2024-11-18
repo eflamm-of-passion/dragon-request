@@ -1,4 +1,4 @@
-package io.eflamm.domain.model.endpoint
+package io.eflamm.dragonrequest.domain.model.endpoint
 
 class Port(val port: Int = 80) {
     fun get(): Int {

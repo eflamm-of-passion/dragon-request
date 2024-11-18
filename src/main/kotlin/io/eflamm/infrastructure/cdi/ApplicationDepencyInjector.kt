@@ -5,8 +5,8 @@ import io.eflamm.application.usecase.DeleteEndpointUseCase
 import io.eflamm.application.usecase.GetEndpointsUseCase
 import io.eflamm.application.usecase.GetSingleEndpointUseCase
 import io.eflamm.application.usecase.UpdateEndpointUseCase
-import io.eflamm.domain.monitoring.Logger
-import io.eflamm.domain.repository.EndpointRepository
+import io.eflamm.dragonrequest.domain.monitoring.Logger
+import io.eflamm.dragonrequest.domain.repository.EndpointRepository
 import io.eflamm.infrastructure.api.EndpointsController
 import io.eflamm.infrastructure.cdi.properties.ApplicationPropertyProvider
 import io.eflamm.infrastructure.cdi.properties.PropertyProvider

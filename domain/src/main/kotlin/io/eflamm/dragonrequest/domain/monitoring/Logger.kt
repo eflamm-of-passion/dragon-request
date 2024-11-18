@@ -1,4 +1,4 @@
-package io.eflamm.domain.monitoring
+package io.eflamm.dragonrequest.domain.monitoring
 
 interface Logger {
     fun info(message: String)

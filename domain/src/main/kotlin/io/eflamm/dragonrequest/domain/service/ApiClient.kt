@@ -1,6 +1,6 @@
-package io.eflamm.domain.service
+package io.eflamm.dragonrequest.domain.service
 
-import io.eflamm.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.Endpoint
 
 class ApiClient {
 

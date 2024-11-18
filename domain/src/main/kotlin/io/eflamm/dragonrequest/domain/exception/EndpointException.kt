@@ -1,4 +1,4 @@
-package io.eflamm.domain.exception
+package io.eflamm.dragonrequest.domain.exception
 
 enum class ErrorType {
     INVALID_INPUT,

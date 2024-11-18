@@ -1,12 +1,12 @@
 package io.eflamm.infrastructure.persistence
 
-import io.eflamm.domain.exception.EndpointException
-import io.eflamm.domain.exception.ErrorType
-import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.DomainName
-import io.eflamm.domain.model.endpoint.Id
-import io.eflamm.domain.model.endpoint.Port
-import io.eflamm.domain.model.endpoint.Protocol
+import io.eflamm.dragonrequest.domain.exception.EndpointException
+import io.eflamm.dragonrequest.domain.exception.ErrorType
+import io.eflamm.dragonrequest.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.endpoint.DomainName
+import io.eflamm.dragonrequest.domain.model.endpoint.Id
+import io.eflamm.dragonrequest.domain.model.endpoint.Port
+import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
 import io.eflamm.infrastructure.EndpointUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*

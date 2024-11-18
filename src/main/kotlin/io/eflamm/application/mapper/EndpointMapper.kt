@@ -1,7 +1,7 @@
 package io.eflamm.application.mapper
 
-import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.*
+import io.eflamm.dragonrequest.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.endpoint.*
 import io.eflamm.infrastructure.api.EndpointCreateInput
 import io.eflamm.infrastructure.api.EndpointOutput
 import io.eflamm.infrastructure.api.EndpointUpdateInput
@@ -42,7 +42,7 @@ class EndpointMapper {
         }
 
         fun businessToDto(endpoint: Endpoint): EndpointOutput {
-            var aggregatedUrl = endpoint.protocol.value
+            var aggregatedUrl: String = endpoint.protocol.value
             aggregatedUrl += PROTOCOL_TO_DOMAIN_SEPARATOR
             aggregatedUrl += endpoint.domain.get()
             if(endpoint.port.isDefaultPort()) {

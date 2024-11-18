@@ -1,6 +1,6 @@
 package io.eflamm.infrastructure.logger
 
-import io.eflamm.domain.monitoring.Logger
+import io.eflamm.dragonrequest.domain.monitoring.Logger
 import org.slf4j.LoggerFactory
 
 class SLF4JLogger: Logger {

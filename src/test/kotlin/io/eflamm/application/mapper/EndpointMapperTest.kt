@@ -1,7 +1,7 @@
 package io.eflamm.application.mapper
 
-import io.eflamm.domain.model.Endpoint
-import io.eflamm.domain.model.endpoint.*
+import io.eflamm.dragonrequest.domain.model.Endpoint
+import io.eflamm.dragonrequest.domain.model.endpoint.*
 import io.eflamm.infrastructure.api.EndpointCreateInput
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
