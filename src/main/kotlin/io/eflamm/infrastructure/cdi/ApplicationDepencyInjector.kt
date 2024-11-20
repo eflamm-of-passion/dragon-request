@@ -1,10 +1,6 @@
 package io.eflamm.infrastructure.cdi
 
-import io.eflamm.application.usecase.CreateEndpointUseCase
-import io.eflamm.application.usecase.DeleteEndpointUseCase
-import io.eflamm.application.usecase.GetEndpointsUseCase
-import io.eflamm.application.usecase.GetSingleEndpointUseCase
-import io.eflamm.application.usecase.UpdateEndpointUseCase
+import io.eflamm.dragonrequest.application.usecase.*
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository
 import io.eflamm.dragonrequest.logger.slf4j.SLF4JLogger

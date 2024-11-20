@@ -1,4 +1,4 @@
-package io.eflamm.application.usecase
+package io.eflamm.dragonrequest.application.usecase
 
 import io.eflamm.dragonrequest.domain.model.endpoint.Id
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository

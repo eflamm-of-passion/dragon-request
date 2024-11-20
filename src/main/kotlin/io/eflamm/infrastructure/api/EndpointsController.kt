@@ -1,12 +1,8 @@
 package io.eflamm.infrastructure.api
 
-import io.eflamm.application.mapper.EndpointMapper
-import io.eflamm.application.mapper.LoggerUtils
-import io.eflamm.application.usecase.CreateEndpointUseCase
-import io.eflamm.application.usecase.DeleteEndpointUseCase
-import io.eflamm.application.usecase.GetEndpointsUseCase
-import io.eflamm.application.usecase.GetSingleEndpointUseCase
-import io.eflamm.application.usecase.UpdateEndpointUseCase
+import io.eflamm.dragonrequest.application.usecase.*
+import io.eflamm.infrastructure.api.mapper.EndpointMapper
+import io.eflamm.infrastructure.api.mapper.LoggerUtils
 import io.eflamm.dragonrequest.domain.exception.EndpointException
 import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.Endpoint

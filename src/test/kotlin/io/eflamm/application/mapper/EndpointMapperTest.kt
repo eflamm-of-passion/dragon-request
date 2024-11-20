@@ -3,6 +3,7 @@ package io.eflamm.application.mapper
 import io.eflamm.dragonrequest.domain.model.Endpoint
 import io.eflamm.dragonrequest.domain.model.endpoint.*
 import io.eflamm.infrastructure.api.EndpointCreateInput
+import io.eflamm.infrastructure.api.mapper.EndpointMapper
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 

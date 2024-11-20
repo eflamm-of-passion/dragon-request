@@ -16,6 +16,7 @@ val quarkusPlatformVersion: String by project
 
 dependencies {
     implementation(project(":domain"))
+    implementation(project(":application"))
     implementation(project(":repository-sqlite"))
     implementation(project(":logger-slf4j"))
     testImplementation(project(":repository-sqlite"))

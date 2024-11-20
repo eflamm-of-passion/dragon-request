@@ -1,4 +1,4 @@
-package io.eflamm.application.mapper
+package io.eflamm.infrastructure.api.mapper
 
 import com.google.gson.GsonBuilder
 

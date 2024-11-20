@@ -1,4 +1,4 @@
-package io.eflamm.application.mapper
+package io.eflamm.infrastructure.api.mapper
 
 import io.eflamm.dragonrequest.domain.model.Endpoint
 import io.eflamm.dragonrequest.domain.model.endpoint.*
