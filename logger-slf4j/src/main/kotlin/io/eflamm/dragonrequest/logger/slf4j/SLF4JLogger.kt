@@ -1,4 +1,4 @@
-package io.eflamm.infrastructure.logger
+package io.eflamm.dragonrequest.logger.slf4j
 
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import org.slf4j.LoggerFactory

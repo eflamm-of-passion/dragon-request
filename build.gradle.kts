@@ -17,6 +17,7 @@ val quarkusPlatformVersion: String by project
 dependencies {
     implementation(project(":domain"))
     implementation(project(":repository-sqlite"))
+    implementation(project(":logger-slf4j"))
     testImplementation(project(":repository-sqlite"))
 
     implementation(enforcedPlatform("${quarkusPlatformGroupId}:${quarkusPlatformArtifactId}:${quarkusPlatformVersion}"))
@@ -25,7 +26,6 @@ dependencies {
     implementation("io.quarkus:quarkus-arc")
     implementation("io.quarkus:quarkus-kotlin")
 
-    implementation("org.slf4j:slf4j-api:2.0.16")
     implementation("ch.qos.logback:logback-classic:1.5.12")
     implementation("com.google.code.gson:gson:2.11.0")
 
