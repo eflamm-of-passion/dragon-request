@@ -3,9 +3,9 @@ package io.eflamm.dragonrequest.logger.slf4j
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import org.slf4j.LoggerFactory
 
-class SLF4JLogger: Logger {
+class SLF4JLogger(className: String): Logger {
 
-    private val logger = LoggerFactory.getLogger(this::class.java.simpleName)
+    private val logger = LoggerFactory.getLogger(className)
 
     override fun info(message: String) {
         logger.info(message)

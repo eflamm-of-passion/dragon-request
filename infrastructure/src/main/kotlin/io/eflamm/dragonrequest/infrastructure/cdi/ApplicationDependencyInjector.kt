@@ -28,7 +28,7 @@ class ApplicationDependencyInjector {
             instantiateCreateEndpointUseCase(),
             instantiateUpdateEndpointUseCase(),
             instantiateDeleteEndpointUseCase(),
-            instantiateLogger()
+            instantiateLogger(EndpointsController::class.java.simpleName)
         )
     }
 
@@ -69,8 +69,8 @@ class ApplicationDependencyInjector {
         return ApplicationPropertyProvider("application-dev.properties")
     }
 
-    private fun instantiateLogger(): Logger {
-        return SLF4JLogger()
+    private fun instantiateLogger(className: String): Logger {
+        return SLF4JLogger(className)
     }
 
 }

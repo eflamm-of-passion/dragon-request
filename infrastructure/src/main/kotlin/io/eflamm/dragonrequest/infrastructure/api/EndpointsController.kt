@@ -43,9 +43,9 @@ class EndpointsController(
         router.put("${Constants.ENDPOINT_BASE_PATH}/:id").consumes("*/json").handler(BodyHandler.create()).handler(this::updateEndpoint)
         router.delete("${Constants.ENDPOINT_BASE_PATH}/:id").handler(this::deleteEndpoint)
 
-        // Start the HTTP server
         vertx.createHttpServer()
             .requestHandler(router)
+            // TODO make port configurable
             .listen(8080) { result ->
                 if (result.succeeded()) {
                     logger.info("Server started on port 8080")

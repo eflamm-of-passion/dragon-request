@@ -10,6 +10,7 @@
 - find a way to launch the tests in all the packages
 - check the diagram
 - create docker compose file
+- fix and remove the irrelevant logs
 - integrate a frontend
 
 ## Architecture
