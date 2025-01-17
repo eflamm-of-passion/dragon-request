@@ -6,7 +6,7 @@
 
 ## TODO
 
-- add the integration tests to the controller
+- choose the properties file from the env variables
 - find a way to launch the tests in all the packages
 - check the diagram
 - create docker compose file

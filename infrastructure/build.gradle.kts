@@ -26,6 +26,8 @@ dependencies {
     testImplementation(kotlin("test"))
     
     testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("io.rest-assured:rest-assured:5.5.0")
+    testImplementation("org.hamcrest:hamcrest:3.0")
 }
 
 tasks.test {
