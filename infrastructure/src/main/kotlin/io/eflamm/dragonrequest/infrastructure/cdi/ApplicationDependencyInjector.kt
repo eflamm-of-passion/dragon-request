@@ -9,68 +9,92 @@ import io.eflamm.dragonrequest.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.dragonrequest.logger.slf4j.SLF4JLogger
 import io.eflamm.dragonrequest.repository.sqlite.SqliteRepository
 
-fun main() {
-    ApplicationDependencyInjector().startApplication()
+fun main(args: Array<String>) {
+    ApplicationDependencyInjector().startApplication(args.toList())
 }
 
 class ApplicationDependencyInjector {
 
     private lateinit var repository: EndpointRepository
+    private lateinit var propertyProvider: PropertyProvider
+    private lateinit var logger: Logger
 
-    fun startApplication() {
-        instantiateController().start()
+    fun startApplication(startArguments: List<String>) {
+        logger = instantiateLogger(this::class.java.simpleName)
+        val profile = getProfile(startArguments)
+        propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile))
+        instantiateController(propertyProvider).start()
     }
 
-    private fun instantiateController(): EndpointsController {
+    private fun getProfile(startupArguments: List<String>): String {
+        // TODO enum for authorized profiles
+        var profile = "default"
+        if (startupArguments.isNotEmpty()) {
+            if(listOf("dev", "testing").contains(startupArguments[0])) {
+                profile = startupArguments[0]
+            }
+        }
+        logger.info("Profile used $profile")
+        return profile
+    }
+
+    private fun getPropertyFileName(profile: String): String {
+        return when(profile) {
+            "dev" -> "application-dev.properties"
+            "testing" -> "application-testing.properties"
+            else -> "application.properties"
+        }
+    }
+
+    private fun instantiateController(propertyProvider: PropertyProvider): EndpointsController {
         return EndpointsController(
-            instantiateGetEndpointsUseCase(),
-            instantiateGetSingleEndpointUseCase(),
-            instantiateCreateEndpointUseCase(),
-            instantiateUpdateEndpointUseCase(),
-            instantiateDeleteEndpointUseCase(),
+            instantiateGetEndpointsUseCase(propertyProvider),
+            instantiateGetSingleEndpointUseCase(propertyProvider),
+            instantiateCreateEndpointUseCase(propertyProvider),
+            instantiateUpdateEndpointUseCase(propertyProvider),
+            instantiateDeleteEndpointUseCase(propertyProvider),
             instantiateLogger(EndpointsController::class.java.simpleName)
         )
     }
 
-    private fun instantiateGetEndpointsUseCase(): GetEndpointsUseCase {
-        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+    private fun instantiateGetEndpointsUseCase(propertyProvider: PropertyProvider): GetEndpointsUseCase {
+        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
         return GetEndpointsUseCase(endpointRepository)
     }
 
-    private fun instantiateGetSingleEndpointUseCase(): GetSingleEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+    private fun instantiateGetSingleEndpointUseCase(propertyProvider: PropertyProvider): GetSingleEndpointUseCase {
+        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
         return GetSingleEndpointUseCase(endpointRepository)
     }
 
-    private fun instantiateCreateEndpointUseCase(): CreateEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+    private fun instantiateCreateEndpointUseCase(propertyProvider: PropertyProvider): CreateEndpointUseCase {
+        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
         return CreateEndpointUseCase(endpointRepository)
     }
 
-    private fun instantiateUpdateEndpointUseCase(): UpdateEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+    private fun instantiateUpdateEndpointUseCase(propertyProvider: PropertyProvider): UpdateEndpointUseCase {
+        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
         return UpdateEndpointUseCase(endpointRepository)
     }
 
-    private fun instantiateDeleteEndpointUseCase(): DeleteEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(instantiatePropertyProviderImpl())
+    private fun instantiateDeleteEndpointUseCase(propertyProvider: PropertyProvider): DeleteEndpointUseCase {
+        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
         return DeleteEndpointUseCase(endpointRepository)
     }
 
     private fun instantiateRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
         if (!this::repository.isInitialized) {
-            repository = SqliteRepository(propertyProvider.get("database.sqlite.file-path"))
+            repository = SqliteRepository(propertyProvider.get("database.sqlite.file-path"), instantiateLogger(SqliteRepository::class.java.simpleName))
             (repository as SqliteRepository).connect()
         }
         return repository
     }
 
-    private fun instantiatePropertyProviderImpl(): PropertyProvider {
-        return ApplicationPropertyProvider("application-dev.properties")
+    private fun instantiatePropertyProviderImpl(propertiesFileName: String): PropertyProvider {
+        return ApplicationPropertyProvider(propertiesFileName)
     }
 
     private fun instantiateLogger(className: String): Logger {
         return SLF4JLogger(className)
     }
-
 }

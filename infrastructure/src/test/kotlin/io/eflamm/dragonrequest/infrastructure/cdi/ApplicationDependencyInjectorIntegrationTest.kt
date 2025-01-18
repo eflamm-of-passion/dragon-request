@@ -16,7 +16,8 @@ class ApplicationDependencyInjectorIntegrationTest {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            ApplicationDependencyInjector().startApplication()
+            val startupArguments = listOf("testing")
+            ApplicationDependencyInjector().startApplication(startupArguments)
         }
 
         @JvmStatic

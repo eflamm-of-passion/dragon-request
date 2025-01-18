@@ -4,6 +4,7 @@ import io.eflamm.dragonrequest.domain.exception.EndpointException
 import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.Endpoint
 import io.eflamm.dragonrequest.domain.model.endpoint.*
+import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository
 import java.sql.Connection
 import java.sql.DriverManager
@@ -11,7 +12,7 @@ import java.sql.PreparedStatement
 import java.sql.ResultSet
 import java.sql.SQLException
 
-class SqliteRepository(private val databaseFilePath: String) : EndpointRepository {
+class SqliteRepository(private val databaseFilePath: String, private val logger: Logger) : EndpointRepository {
 
     object Constants {
         const val SQLITE_DRIVER = "jdbc:sqlite:"
@@ -156,7 +157,7 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
     fun disconnect() {
         if (this::connection.isInitialized) {
             connection.close()
-            println("Disconnected to database")
+            logger.info("Disconnected to database")
         }
 
     }
@@ -184,7 +185,7 @@ class SqliteRepository(private val databaseFilePath: String) : EndpointRepositor
             Class.forName("org.sqlite.JDBC")  // Explicitly load the SQLite driver
             connection = DriverManager.getConnection(Constants.SQLITE_DRIVER + databaseFilePath)
             initDatabase()
-            println("Connected to database")
+            logger.info("Connected to database")
         } catch (e: SQLException) {
             throw e
         }
