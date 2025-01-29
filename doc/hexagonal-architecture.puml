@@ -2,10 +2,24 @@
 
 package application.usecase {
     class CreateEndpointUseCase {
-        - endpointRepository: EndpointRepository
+        - endpointRepository: EndpointRepository,
+        + execute(endpoint: Endpoint): Result<Endpoint>
     }
-    class GetEndpointUseCase {
-        - endpointRepository: EndpointRepository
+    class GetEndpointsUseCase {
+        - endpointRepository: EndpointRepository,
+        + execute(): Result<List<Endpoint>>
+    }
+    class GetSingleEndpointUseCase {
+        - endpointRepository: EndpointRepository,
+        + execute(idAsString: String): Result<Endpoint>
+    }
+    class UpdateEndpointUseCase {
+        - endpointRepository: EndpointRepository,
+        + execute(endpoint: Endpoint): Result<Endpoint>
+    }
+    class DeleteEndpointUseCase {
+        - endpointRepository: EndpointRepository,
+        + execute(idAsString: String): Result<Unit>
     }
 }
 
@@ -29,37 +43,83 @@ package domain.repository {
     }
 }
 
+package domain.logger {
+    interface Logger {
+        + info(message: String)
+        + debug(message: String)
+        + warn(message: String)
+        + error(message: String)
+    }
+}
+
 package 1-infrastructure {
     package api {
         class EndpointsController {
-                + getEndpoint(id: String) : Response<EndpointOutput>
-                + createEndpoint(endpointInput: EndpointInput): Response<EndpointOutput>
-            }
-    }
-    class EndpointOutput {
-        + id: String?,
-        + protocol: String,
-        + domain: String,
-        + port: Int,
-        + path: String,
-        + queryParameters: String
-    }
-    class EndpointInput {
-        + protocol: String,
-        + domain: String,
-        + port: Int,
-        + path: String,
-        + queryParameters: String
+            + start(),
+            - getEndpoints(context: RoutingContext),
+'            - handleSuccessGetEndpoints(context: RoutingContext, getEndpointResult: Result<List<Endpoint>>),
+'            - handleFailureGetEndpoints(context: RoutingContext, e: EndpointException),
+            - getEndpoint(context: RoutingContext),
+'            - handleSuccessGetEndpoint(context: RoutingContext, id: String, getEndpointResult: Result<Endpoint>),
+            - createEndpoint(context: RoutingContext),
+'            - handleSuccessCreateEndpoint(context: RoutingContext, createEndpointResult: Result<Endpoint>),
+'            - handleFailureCreateEndpoint(context: RoutingContext, e: EndpointException),
+            - updateEndpoint(context: RoutingContext),
+'            - handleSuccessUpdateEndpoint(context: RoutingContext, id: String, updateEndpointResult: Result<Endpoint>),
+'            - handleFailureUpdateEndpoint(context: RoutingContext, id: String, e: EndpointException),
+            - deleteEndpoint(context: RoutingContext),
+'            - handleSuccessDeleteEndpoint(context: RoutingContext, id: String),
+'            - handleFailureGetOrDeleteEndpoint(context: RoutingContext, id: String, e: EndpointException)
+        }
+        class EndpointMapper {
+            + dtoToBusiness(endpointCreateInput: EndpointCreateInput): Endpoint,
+            + dtoToBusiness(endpointUpdateInput: EndpointUpdateInput): Endpoint,
+            + businessToDto(endpoints: List<Endpoint>): List<EndpointOutput>,
+            + businessToDto(endpoint: Endpoint): EndpointOutput
+        }
+        class EndpointsValidator {
+            + validate(input: EndpointCreateInput): String,
+            + validate(id: String, input: EndpointUpdateInput): String,
+            + doesNotContainErrors(errorMessage: String): Boolean
+        }
+        class EndpointCreateInput {
+            + url: String
+        }
+        class EndpointUpdateInput {
+            + id: String,
+            + url: String
+        }
+        class EndpointOutput {
+            + id: String,
+            + url: String
+        }
     }
 }
 
 package 2-infrastructure {
     package cdi {
+        class main {}
         class ApplicationDepencyInjector {
-            - repository: EndpointRepository
-            + instantiateController(): EndpointsController
-            + instantiateGetEndpointUseCase(): GetEndpointUseCase
-            + instantiateCreateEndpointUseCase(): CreateEndpointUseCase
+            + startApplication(startArguments: List<String>),
+'            - getProfile(startupArguments: List<String>): String,
+'            - getPropertyFileName(profile: String): String ,
+'            - instantiateController(propertyProvider: PropertyProvider): EndpointsController,
+'            - instantiateGetEndpointsUseCase(propertyProvider: PropertyProvider): GetEndpointsUseCase,
+'            - instantiateGetSingleEndpointUseCase(propertyProvider: PropertyProvider): GetSingleEndpointUseCase,
+'            - instantiateCreateEndpointUseCase(propertyProvider: PropertyProvider): CreateEndpointUseCase,
+'            - instantiateUpdateEndpointUseCase(propertyProvider: PropertyProvider): UpdateEndpointUseCase,
+'            - instantiateDeleteEndpointUseCase(propertyProvider: PropertyProvider): DeleteEndpointUseCase,
+'            - instantiateRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository,
+'            - instantiatePropertyProviderImpl(propertiesFileName: String): PropertyProvider,
+'            - instantiateLogger(className: String): Logger,
+        }
+        package properties {
+            interface PropertyProvider {
+                + get(key: String): String
+            }
+            class ApplicationPropertiesFileProvider implements PropertyProvider {
+                + get(key: String): String
+            }
         }
     }
 }
@@ -83,16 +143,40 @@ package 3-infrastructure {
     }
 }
 
+package logger-slf4j {
+    class SLF4JLogger implements domain.logger.Logger {
+        + info(message: String)
+        + debug(message: String)
+        + warn(message: String)
+        + error(message: String)
+    }
+}
+
 'application
 CreateEndpointUseCase -right-> domain.repository.EndpointRepository
-GetEndpointUseCase -right-> domain.repository.EndpointRepository
+GetEndpointsUseCase -right-> domain.repository.EndpointRepository
+GetSingleEndpointUseCase -right-> domain.repository.EndpointRepository
+UpdateEndpointUseCase -right-> domain.repository.EndpointRepository
+DeleteEndpointUseCase -right-> domain.repository.EndpointRepository
 CreateEndpointUseCase -up-> Endpoint
-GetEndpointUseCase -up-> Endpoint
+GetEndpointsUseCase -up-> Endpoint
+GetSingleEndpointUseCase -up-> Endpoint
+UpdateEndpointUseCase -up-> Endpoint
+DeleteEndpointUseCase -up-> Endpoint
 
 'infrastructure
+EndpointsController -left-> EndpointsValidator
 EndpointsController -right-> EndpointOutput
-EndpointsController -down-> EndpointInput
+EndpointsController -down-> EndpointCreateInput
+EndpointsController -down-> EndpointUpdateInput
 EndpointsController -up-> CreateEndpointUseCase
-EndpointsController -up-> GetEndpointUseCase
+EndpointsController -up-> GetEndpointsUseCase
+EndpointsController -up-> GetSingleEndpointUseCase
+EndpointsController -up-> UpdateEndpointUseCase
+EndpointsController -up-> DeleteEndpointUseCase
+
+main -up-> ApplicationDepencyInjector
+ApplicationDepencyInjector -up-> EndpointsController
+ApplicationDepencyInjector -up-> PropertyProvider
 
 @enduml

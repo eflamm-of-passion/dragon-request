@@ -4,7 +4,7 @@ import io.eflamm.dragonrequest.application.usecase.*
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository
 import io.eflamm.dragonrequest.infrastructure.api.EndpointsController
-import io.eflamm.dragonrequest.infrastructure.cdi.properties.ApplicationPropertyProvider
+import io.eflamm.dragonrequest.infrastructure.cdi.properties.ApplicationPropertiesFileProvider
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.dragonrequest.logger.slf4j.SLF4JLogger
 import io.eflamm.dragonrequest.repository.sqlite.SqliteRepository
@@ -91,7 +91,7 @@ class ApplicationDependencyInjector {
     }
 
     private fun instantiatePropertyProviderImpl(propertiesFileName: String): PropertyProvider {
-        return ApplicationPropertyProvider(propertiesFileName)
+        return ApplicationPropertiesFileProvider(propertiesFileName)
     }
 
     private fun instantiateLogger(className: String): Logger {

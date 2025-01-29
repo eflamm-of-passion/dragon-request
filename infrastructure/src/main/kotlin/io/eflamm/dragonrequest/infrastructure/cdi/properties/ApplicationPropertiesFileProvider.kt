@@ -2,7 +2,7 @@ package io.eflamm.dragonrequest.infrastructure.cdi.properties
 
 import java.util.Properties
 
-class ApplicationPropertyProvider(private val propertiesFilePath: String): PropertyProvider {
+class ApplicationPropertiesFileProvider(propertiesFilePath: String): PropertyProvider {
     // TODO be able to load properties from many properties files
 
     private val properties: Properties = Properties()

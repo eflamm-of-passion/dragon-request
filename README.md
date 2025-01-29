@@ -6,7 +6,6 @@
 
 ## TODO
 
-- check the diagram
 - create docker compose file
 - fix and remove the irrelevant logs
 - integrate a frontend
