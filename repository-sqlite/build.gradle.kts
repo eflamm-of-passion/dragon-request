@@ -16,6 +16,7 @@ dependencies {
 
     testImplementation(kotlin("test"))
     testImplementation("org.assertj:assertj-core:3.26.3")
+    testImplementation("io.mockk:mockk:1.13.16")
 }
 
 tasks.test {

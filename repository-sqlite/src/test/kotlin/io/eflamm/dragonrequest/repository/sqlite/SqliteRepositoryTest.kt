@@ -4,6 +4,7 @@ import io.eflamm.dragonrequest.domain.exception.EndpointException
 import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.Endpoint
 import io.eflamm.dragonrequest.domain.model.endpoint.*
+import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.*
 
@@ -27,7 +28,7 @@ class SqliteRepositoryTest {
 
     @BeforeAll
     fun setupDatabase() {
-        repository = SqliteRepository(":memory:")
+        repository = SqliteRepository(":memory:", mockk(relaxed = true))
         repository.connect()
     }
 

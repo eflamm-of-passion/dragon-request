@@ -1,7 +1,13 @@
 # Dragon reQuest
 
+Run the app : 
 ```shell script
 ./gradlew run
+```
+
+To list all the modules that are loaded : 
+```shell script
+./gradlew -q projects
 ```
 
 ## TODO
