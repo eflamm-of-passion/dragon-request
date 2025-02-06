@@ -11,7 +11,6 @@ repositories {
 }
 
 dependencies {
-
     implementation(project(":domain"))
     implementation(project(":application"))
     implementation(project(":repository-sqlite"))
@@ -39,4 +38,14 @@ kotlin {
 
 application {
     mainClass.set("io.eflamm.dragonrequest.infrastructure.cdi.ApplicationDependencyInjectorKt")
+}
+
+tasks.jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    manifest {
+        attributes["Main-Class"] = "io.eflamm.dragonrequest.infrastructure.cdi.ApplicationDependencyInjectorKt"
+    }
+    from(
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+    )
 }

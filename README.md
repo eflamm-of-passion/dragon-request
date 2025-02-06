@@ -1,11 +1,20 @@
 # Dragon reQuest
 
-Run the app : 
+Run the app :
+
 ```shell script
 ./gradlew run
 ```
 
-To list all the modules that are loaded : 
+To build and run the app :
+
+```shell script
+./gradlew clean build
+java -jar infrastructure/build/libs/infrastructure-1.0-SNAPSHOT.jar
+```
+
+To list all the modules that are loaded :
+
 ```shell script
 ./gradlew -q projects
 ```
@@ -13,6 +22,7 @@ To list all the modules that are loaded :
 ## TODO
 
 - create docker compose file
+- place all the libraries versions in an external file
 - fix and remove the irrelevant logs
 - integrate a frontend
 
