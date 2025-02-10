@@ -3,7 +3,6 @@ plugins {
 }
 
 group = "io.eflamm.dragonrequest"
-version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
@@ -12,8 +11,8 @@ repositories {
 dependencies {
     implementation(project(":domain"))
 
-    implementation("org.slf4j:slf4j-api:2.0.16")
-    implementation("ch.qos.logback:logback-classic:1.5.12")
+    implementation(libs.slf4j)
+    implementation(libs.logback)
 
     testImplementation(kotlin("test"))
 }

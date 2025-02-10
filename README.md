@@ -21,8 +21,8 @@ To list all the modules that are loaded :
 
 ## TODO
 
-- place all the libraries versions in an external file
 - fix and remove the irrelevant logs
+- fix deprecated URL warning
 - integrate a frontend
 
 ## Architecture

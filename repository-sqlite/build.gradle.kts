@@ -12,11 +12,11 @@ repositories {
 dependencies {
     implementation(project(":domain"))
 
-    implementation("org.xerial:sqlite-jdbc:3.47.0.0")
+    implementation(libs.sqlite)
 
     testImplementation(kotlin("test"))
-    testImplementation("org.assertj:assertj-core:3.26.3")
-    testImplementation("io.mockk:mockk:1.13.16")
+    testImplementation(libs.assertj)
+    testImplementation(libs.mockk)
 }
 
 tasks.test {
