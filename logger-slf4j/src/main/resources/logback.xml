@@ -8,4 +8,11 @@
     <root level="debug">
         <appender-ref ref="STDOUT" />
     </root>
+
+
+    <!-- Set specific logging levels for different packages or classes -->
+    <logger name="ch.qos.logback" level="WARN" />
+    <logger name="io.vertx" level="ERROR" />
+    <logger name="io.netty" level="ERROR" />
+    <logger name="io.eflamm.dragonrequest" level="DEBUG" />
 </configuration>

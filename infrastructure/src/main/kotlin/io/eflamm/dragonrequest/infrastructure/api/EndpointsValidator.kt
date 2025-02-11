@@ -1,8 +1,8 @@
 package io.eflamm.dragonrequest.infrastructure.api
 
 import java.net.MalformedURLException
+import java.net.URI
 import java.net.URISyntaxException
-import java.net.URL
 import java.util.stream.Collectors
 
 abstract class EndpointsValidator {
@@ -30,7 +30,7 @@ abstract class EndpointsValidator {
 
         private fun validateUrlFormat(urlAsString: String): String {
             return try {
-                URL(urlAsString).toURI()
+                URI(urlAsString)
                 ""
             } catch (e: MalformedURLException) {
                 "The URL is malformed:  $urlAsString. "

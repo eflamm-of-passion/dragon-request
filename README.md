@@ -21,8 +21,7 @@ To list all the modules that are loaded :
 
 ## TODO
 
-- fix and remove the irrelevant logs
-- fix deprecated URL warning
+- fix the integration test
 - integrate a frontend
 
 ## Architecture
