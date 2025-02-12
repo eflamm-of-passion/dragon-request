@@ -22,6 +22,7 @@ To list all the modules that are loaded :
 ## TODO
 
 - fix the integration test
+- make the server port configurable
 - integrate a frontend
 
 ## Architecture

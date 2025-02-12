@@ -20,6 +20,7 @@ class ApplicationDependencyInjector {
     private lateinit var logger: Logger
 
     fun startApplication(startArguments: List<String>) {
+        printOutAppName()
         logger = instantiateLogger(this::class.java.simpleName)
         val profile = getProfile(startArguments)
         propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile))
@@ -34,7 +35,7 @@ class ApplicationDependencyInjector {
                 profile = startupArguments[0]
             }
         }
-        logger.info("Profile used $profile")
+        logger.info("Profile used : $profile")
         return profile
     }
 
@@ -47,6 +48,7 @@ class ApplicationDependencyInjector {
     }
 
     private fun instantiateController(propertyProvider: PropertyProvider): EndpointsController {
+        logInstantiation(EndpointsController::class.java.simpleName, "controller")
         return EndpointsController(
             instantiateGetEndpointsUseCase(propertyProvider),
             instantiateGetSingleEndpointUseCase(propertyProvider),
@@ -86,15 +88,50 @@ class ApplicationDependencyInjector {
         if (!this::repository.isInitialized) {
             repository = SqliteRepository(propertyProvider.get("database.sqlite.file-path"), instantiateLogger(SqliteRepository::class.java.simpleName))
             (repository as SqliteRepository).connect()
+            logInstantiation(SqliteRepository::class.java.simpleName, "EndpointRepository")
         }
         return repository
     }
 
     private fun instantiatePropertyProviderImpl(propertiesFileName: String): PropertyProvider {
+        logInstantiation(ApplicationPropertiesFileProvider::class.java.simpleName, "PropertyProvider")
         return ApplicationPropertiesFileProvider(propertiesFileName)
     }
 
-    private fun instantiateLogger(className: String): Logger {
-        return SLF4JLogger(className)
+    private fun instantiateLogger(forClassName: String): Logger {
+        val logger = SLF4JLogger(forClassName)
+        logger.info("instantiate ${SLF4JLogger::class.java.simpleName} as Logger in $forClassName")
+        return logger
+    }
+
+    private fun logInstantiation(className: String, asInterfaceName: String) {
+        logger.info("instantiate $className as $asInterfaceName")
+    }
+
+    private fun logLoggerInstantiation(className: String, forClassName: String ) {
+        logger.info("instantiate $className as Logger for $forClassName")
+    }
+
+    private fun printOutAppName() {
+        println("""   
+                                 ██████████                                                           
+                                ░░███░░░░███                                                          
+                                 ░███   ░░███ ████████   ██████    ███████  ██████  ████████          
+                                 ░███    ░███░░███░░███ ░░░░░███  ███░░███ ███░░███░░███░░███         
+                                 ░███    ░███ ░███ ░░░   ███████ ░███ ░███░███ ░███ ░███ ░███         
+                                 ░███    ███  ░███      ███░░███ ░███ ░███░███ ░███ ░███ ░███         
+                                 ██████████   █████    ░░████████░░███████░░██████  ████ █████        
+                                ░░░░░░░░░░   ░░░░░      ░░░░░░░░  ░░░░░███ ░░░░░░  ░░░░ ░░░░░         
+                                                                  ░██ ░███                                                       
+                                                  ██████          ░░█████                █████   
+                                                ███░░░░███         ░░░░░░               ░░███    
+                            ████████   ██████  ███    ░░███ █████ ████  ██████   █████  ███████  
+                           ░░███░░███ ███░░███░███     ░███░░███ ░███  ███░░███ ███░░  ░░░███░   
+                            ░███ ░░░ ░███████ ░███   ██░███ ░███ ░███ ░███████ ░░█████   ░███    
+                            ░███     ░███░░░  ░░███ ░░████  ░███ ░███ ░███░░░   ░░░░███  ░███ ███
+                            █████    ░░██████  ░░░██████░██ ░░████████░░██████  ██████   ░░█████ 
+                           ░░░░░      ░░░░░░     ░░░░░░ ░░   ░░░░░░░░  ░░░░░░  ░░░░░░     ░░░░░  
+
+        """)
     }
 }

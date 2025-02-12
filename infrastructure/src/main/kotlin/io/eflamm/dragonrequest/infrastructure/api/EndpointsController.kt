@@ -48,7 +48,7 @@ class EndpointsController(
             // TODO make port configurable
             .listen(8080) { result ->
                 if (result.succeeded()) {
-                    logger.info("Server started on port 8080")
+                    logger.info("Server started on port :8080")
                 } else {
                     logger.error("Failed to start the server: ${result.cause()}")
                 }
