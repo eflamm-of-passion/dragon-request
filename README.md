@@ -22,7 +22,7 @@ To list all the modules that are loaded :
 ## TODO
 
 - fix the integration test
-- make the server port configurable
+- validate the properties type (probably use an interface)
 - integrate a frontend
 
 ## Architecture

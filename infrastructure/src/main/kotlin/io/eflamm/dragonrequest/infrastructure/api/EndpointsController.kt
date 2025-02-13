@@ -32,7 +32,7 @@ class EndpointsController(
     }
 
 
-    fun start() {
+    fun start(port: Int) {
         val vertx = Vertx.vertx()
         val router = Router.router(vertx)
 
@@ -45,10 +45,9 @@ class EndpointsController(
 
         vertx.createHttpServer()
             .requestHandler(router)
-            // TODO make port configurable
-            .listen(8080) { result ->
+            .listen(port) { result ->
                 if (result.succeeded()) {
-                    logger.info("Server started on port :8080")
+                    logger.info("Server started on port :$port")
                 } else {
                     logger.error("Failed to start the server: ${result.cause()}")
                 }
