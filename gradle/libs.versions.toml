@@ -24,4 +24,4 @@ mockk = { group = "io.mockk", name = "mockk", version = "1.13.16" }
 
 [bundles]
 jackson = ["jackson-databind", "jackson-module"]
-vertx = ["vertx-stack", "vertx-web", "vertx-junit"]
+vertx = ["vertx-stack", "vertx-web"]

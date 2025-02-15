@@ -8,6 +8,7 @@ import io.eflamm.dragonrequest.infrastructure.cdi.properties.ApplicationProperti
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.dragonrequest.logger.slf4j.SLF4JLogger
 import io.eflamm.dragonrequest.repository.sqlite.SqliteRepository
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     ApplicationDependencyInjector().startApplication(args.toList())
@@ -16,24 +17,32 @@ fun main(args: Array<String>) {
 class ApplicationDependencyInjector {
 
     private lateinit var repository: EndpointRepository
-    private lateinit var propertyProvider: PropertyProvider
     private lateinit var logger: Logger
 
     fun startApplication(startArguments: List<String>) {
         printOutAppName()
+
         logger = instantiateLogger(this::class.java.simpleName)
+
         val profile = getProfile(startArguments)
-        propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile), getPropertyFileName("default"))
-        val port = propertyProvider.get("http-server.port").toInt()
-        instantiateController(propertyProvider).start(port)
+        try {
+            val propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile), getPropertyFileName("default"))
+            instantiateController(propertyProvider).start(propertyProvider.httpServerPort())
+        } catch (e: RuntimeException) {
+            logger.error("Failed to load the properties, exiting application")
+            exitProcess(1)
+        }
     }
 
     private fun getProfile(startupArguments: List<String>): String {
-        // TODO enum for authorized profiles
+        val authorizedProfiles = listOf("dev", "integration-testing")
         var profile = "default"
         if (startupArguments.isNotEmpty()) {
-            if(listOf("dev", "testing").contains(startupArguments[0])) {
-                profile = startupArguments[0]
+            val profileAppArgument = startupArguments[0]
+            if(authorizedProfiles.contains(profileAppArgument)) {
+                profile = profileAppArgument
+            } else {
+                logger.warn("Unauthorized profile : $profileAppArgument")
             }
         }
         logger.info("Profile used : $profile")
@@ -43,7 +52,7 @@ class ApplicationDependencyInjector {
     private fun getPropertyFileName(profile: String): String {
         return when(profile) {
             "dev" -> "application-dev.properties"
-            "testing" -> "application-testing.properties"
+            "integration-testing" -> "application-integration-testing.properties"
             "default" -> "application.properties"
             else -> "application.properties"
         }
@@ -88,7 +97,7 @@ class ApplicationDependencyInjector {
 
     private fun instantiateRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
         if (!this::repository.isInitialized) {
-            repository = SqliteRepository(propertyProvider.get("database.sqlite.file-path"), instantiateLogger(SqliteRepository::class.java.simpleName))
+            repository = SqliteRepository(propertyProvider.sqliteFilePath(), instantiateLogger(SqliteRepository::class.java.simpleName))
             (repository as SqliteRepository).connect()
             logInstantiation(SqliteRepository::class.java.simpleName, "EndpointRepository")
         }
@@ -97,7 +106,8 @@ class ApplicationDependencyInjector {
 
     private fun instantiatePropertyProviderImpl(propertiesFileName: String, fallbackPropertiesFileName: String): PropertyProvider {
         logInstantiation(ApplicationPropertiesFileProvider::class.java.simpleName, "PropertyProvider")
-        return ApplicationPropertiesFileProvider(propertiesFileName, fallbackPropertiesFileName)
+        val provider = ApplicationPropertiesFileProvider(propertiesFileName, fallbackPropertiesFileName, instantiateLogger(ApplicationPropertiesFileProvider::class.java.simpleName))
+        return provider
     }
 
     private fun instantiateLogger(forClassName: String): Logger {
@@ -108,10 +118,6 @@ class ApplicationDependencyInjector {
 
     private fun logInstantiation(className: String, asInterfaceName: String) {
         logger.info("instantiate $className as $asInterfaceName")
-    }
-
-    private fun logLoggerInstantiation(className: String, forClassName: String ) {
-        logger.info("instantiate $className as Logger for $forClassName")
     }
 
     private fun printOutAppName() {
@@ -132,8 +138,7 @@ class ApplicationDependencyInjector {
                         ░███ ░░░ ░███████ ░███   ██░███ ░███ ░███ ░███████ ░░█████   ░███    
                         ░███     ░███░░░  ░░███ ░░████  ░███ ░███ ░███░░░   ░░░░███  ░███ ███
                         █████    ░░██████  ░░░██████░██ ░░████████░░██████  ██████   ░░█████ 
-                       ░░░░░      ░░░░░░     ░░░░░░ ░░   ░░░░░░░░  ░░░░░░  ░░░░░░     ░░░░░  
-
+                       ░░░░░      ░░░░░░     ░░░░░░ ░░   ░░░░░░░░  ░░░░░░  ░░░░░░     ░░░░░ 
         """)
     }
 }

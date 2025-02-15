@@ -7,6 +7,7 @@ import org.hamcrest.CoreMatchers.equalTo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
+import java.io.File
 
 class ApplicationDependencyInjectorIntegrationTest {
 
@@ -16,14 +17,14 @@ class ApplicationDependencyInjectorIntegrationTest {
         @JvmStatic
         @BeforeAll
         fun setup() {
-            val startupArguments = listOf("testing")
+            val startupArguments = listOf("integration-testing")
             ApplicationDependencyInjector().startApplication(startupArguments)
         }
 
         @JvmStatic
         @AfterAll
         fun tearDown() {
-            // TODO delete the database
+            File("sqlite-database-testing.db").delete()
         }
     }
 

@@ -2,6 +2,7 @@ package io.eflamm.dragonrequest.logger.slf4j
 
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import org.slf4j.LoggerFactory
+import kotlin.math.log
 
 class SLF4JLogger(className: String): Logger {
 
@@ -19,8 +20,11 @@ class SLF4JLogger(className: String): Logger {
         logger.warn(message)
     }
 
-    override fun error(message: String, e: Throwable?) {
-        logger.error(message, e)
+    override fun error(message: String, detailMessages: List<String>?, e: Throwable?) {
+        logger.error(message)
+        detailMessages?.let {
+            it.forEach { detailMessage -> logger.error("↳ $detailMessage") }
+        }
     }
 
 }
