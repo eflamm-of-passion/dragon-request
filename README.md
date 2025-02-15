@@ -21,8 +21,8 @@ To list all the modules that are loaded :
 
 ## TODO
 
-- fix the integration test
 - validate the properties type (probably use an interface)
+- delete the test database file
 - integrate a frontend
 
 ## Architecture

@@ -8,15 +8,20 @@ class ApplicationPropertiesFileProviderTest {
     @Test
     fun `GIVEN the provider is created WHEN get the property THEN returns the property value`() {
         // given
-        val provider = ApplicationPropertiesFileProvider("application.properties")
-        // we suppose that the property do exist in the gradle.properties file
-        val propertyKey = "database.sqlite.file-path"
-        val expectedPropertyValue = "sqlite-database.db"
+        val provider = ApplicationPropertiesFileProvider("application-testing.properties","application.properties")
+        // we suppose that the property do exist in the application-testing.properties file
+        val sqlitePropertyKey = "database.sqlite.file-path"
+        val expectedSqlitePropertyValue = "sqlite-database-testing.db"
+        // we suppose that the property do exist in the application.properties file
+        val httpPortPropertyKey = "http-server.port"
+        val expectedHttpPortPropertyValue = "8080"
 
         // when
-        val actualPropertyValue = provider.get(propertyKey)
+        val actualSqlitePropertyValue = provider.get(sqlitePropertyKey)
+        val actualHttpPortPropertyValue = provider.get(httpPortPropertyKey)
 
         // then
-        assertThat(actualPropertyValue).isEqualTo(expectedPropertyValue)
+        assertThat(actualSqlitePropertyValue).isEqualTo(expectedSqlitePropertyValue)
+        assertThat(actualHttpPortPropertyValue).isEqualTo(expectedHttpPortPropertyValue)
     }
 }

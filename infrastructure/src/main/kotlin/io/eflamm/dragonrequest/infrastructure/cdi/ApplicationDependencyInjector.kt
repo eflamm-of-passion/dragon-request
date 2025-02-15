@@ -23,7 +23,7 @@ class ApplicationDependencyInjector {
         printOutAppName()
         logger = instantiateLogger(this::class.java.simpleName)
         val profile = getProfile(startArguments)
-        propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile))
+        propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile), getPropertyFileName("default"))
         val port = propertyProvider.get("http-server.port").toInt()
         instantiateController(propertyProvider).start(port)
     }
@@ -44,6 +44,7 @@ class ApplicationDependencyInjector {
         return when(profile) {
             "dev" -> "application-dev.properties"
             "testing" -> "application-testing.properties"
+            "default" -> "application.properties"
             else -> "application.properties"
         }
     }
@@ -94,9 +95,9 @@ class ApplicationDependencyInjector {
         return repository
     }
 
-    private fun instantiatePropertyProviderImpl(propertiesFileName: String): PropertyProvider {
+    private fun instantiatePropertyProviderImpl(propertiesFileName: String, fallbackPropertiesFileName: String): PropertyProvider {
         logInstantiation(ApplicationPropertiesFileProvider::class.java.simpleName, "PropertyProvider")
-        return ApplicationPropertiesFileProvider(propertiesFileName)
+        return ApplicationPropertiesFileProvider(propertiesFileName, fallbackPropertiesFileName)
     }
 
     private fun instantiateLogger(forClassName: String): Logger {

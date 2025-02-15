@@ -3,6 +3,7 @@ package io.eflamm.dragonrequest.infrastructure.api
 import java.net.MalformedURLException
 import java.net.URI
 import java.net.URISyntaxException
+import java.net.URL
 import java.util.stream.Collectors
 
 abstract class EndpointsValidator {
@@ -29,14 +30,20 @@ abstract class EndpointsValidator {
         }
 
         private fun validateUrlFormat(urlAsString: String): String {
-            return try {
-                URI(urlAsString)
-                ""
-            } catch (e: MalformedURLException) {
-                "The URL is malformed:  $urlAsString. "
-            } catch (e: URISyntaxException) {
-                "The URL is malformed:  $urlAsString. "
+            var errorMessage = ""
+            try {
+                URI(urlAsString).toURL()
+                return errorMessage
+            } catch (e: Exception) {
+                errorMessage = when(e) {
+                    is IllegalArgumentException, is MalformedURLException, is URISyntaxException ->  {
+                        "The URL is malformed:  $urlAsString. "
+                    }
+                    else -> "Unhandled exception"
+                }
+                return errorMessage
             }
+
         }
     }
 }
