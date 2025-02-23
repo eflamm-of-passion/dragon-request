@@ -13,6 +13,11 @@ dependencies {
     implementation(project(":infrastructure"))
 }
 
+tasks.register("package") {
+    group = "custom"
+    description = ""
+    dependsOn(":infrastructure:jar")
+}
 tasks.test {
     useJUnitPlatform()
 }
