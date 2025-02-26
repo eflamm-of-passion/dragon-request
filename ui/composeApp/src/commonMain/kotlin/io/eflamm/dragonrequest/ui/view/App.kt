@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,12 +42,13 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 @Preview
-fun App(endpointViewModel: EndpointViewModel = viewModel { EndpointViewModel() }) {
-    LaunchedEffect(Unit) {
+fun App(endpointViewModel: EndpointViewModel) {
+    fun executeOnStart() {
         endpointViewModel.loadEndpoints()
     }
 
     MaterialTheme {
+        executeOnStart()
         val endpoints = endpointViewModel.endpoints
         val (currentEndpoint, setCurrentEndpoint) = remember { mutableStateOf("https://www.google.com") }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
@@ -62,10 +64,12 @@ fun App(endpointViewModel: EndpointViewModel = viewModel { EndpointViewModel() }
 
 @Composable
 fun EndpointList(endpoints: List<Endpoint>) {
-    Column(Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState())) {
-        if (endpoints.isNotEmpty()) {
+    if (endpoints.isNotEmpty()) {
+        Column(Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
             endpoints.forEach { EndpointListItem(it) }
-        } else {
+        }
+    } else {
+        Column(Modifier.fillMaxWidth(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
             Text("No endpoints saved", color = Color.Gray)
         }
     }
@@ -73,11 +77,12 @@ fun EndpointList(endpoints: List<Endpoint>) {
 
 @Composable
 fun EndpointListItem(endpoint: Endpoint) {
-    Row(Modifier
-        .fillMaxWidth()
-        .height(60.dp)
-        .padding(top = 8.dp, start = 8.dp, end = 8.dp)
-        .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .height(60.dp)
+            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+            .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround
     ) {
@@ -93,7 +98,7 @@ fun EndpointListItemOptions() {
     Row {
         Icon(
             Icons.Rounded.Save,
-            contentDescription = "More options on this endpoint"
+            contentDescription = "Save changes on this endpoint"
         )
         Icon(
             Icons.Rounded.MoreVert,
@@ -104,7 +109,11 @@ fun EndpointListItemOptions() {
 
 @Composable
 fun EndpointForm(currentEndpoint: String, setCurrentEndpoint: (String) -> Unit) {
-    Column(Modifier.fillMaxSize().background(color = Color.LightGray), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        Modifier.fillMaxSize().background(color = Color.LightGray),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Row(Modifier.fillMaxWidth(0.8f)) {
             TextField(
                 value = currentEndpoint,
@@ -129,7 +138,9 @@ fun EndpointForm(currentEndpoint: String, setCurrentEndpoint: (String) -> Unit) 
 
 @Composable
 fun SendButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White)
+
 @Composable
 fun SaveButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.White)
+
 @Composable
 fun DeleteButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
