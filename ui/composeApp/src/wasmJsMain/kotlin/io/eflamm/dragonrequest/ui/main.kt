@@ -6,12 +6,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import io.eflamm.dragonrequest.ui.view.App
 import io.eflamm.dragonrequest.ui.viewmodel.EndpointViewModel
 import io.eflamm.dragonrequest.ui.viewmodel.MockEndpointProvider
+import io.eflamm.dragonrequest.ui.viewmodel.RestEndpointProvider
 import kotlinx.browser.document
 
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
-    // TODO give an implementation of the API client
-    val endpointProvider = MockEndpointProvider()
+//    val endpointProvider = MockEndpointProvider()
+    val endpointProvider = RestEndpointProvider()
     ComposeViewport(document.body!!) {
         App(viewModel { EndpointViewModel(endpointProvider) })
     }

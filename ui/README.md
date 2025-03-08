@@ -22,5 +22,6 @@ You can open the web application by running the `:composeApp:wasmJsBrowserDevelo
 TODO
 - install a HTTP client to call the API
 - get the endpoints from the API
+- logging
 - create a Docker container
 - check what I can do for testing

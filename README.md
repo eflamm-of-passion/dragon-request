@@ -23,6 +23,7 @@ To list all the modules that are loaded :
 
 - check the diagram
 - integrate a frontend
+- add hypermedia links
 
 ## Architecture
 

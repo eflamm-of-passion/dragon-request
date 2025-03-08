@@ -7,7 +7,10 @@ import io.eflamm.dragonrequest.domain.model.Endpoint
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.infrastructure.api.mapper.EndpointMapper
 import io.eflamm.dragonrequest.infrastructure.api.mapper.LoggerUtils
+import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Vertx
+import io.vertx.core.http.HttpHeaders
+import io.vertx.core.http.HttpServerResponse
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
@@ -31,18 +34,27 @@ class EndpointsController(
         const val DEFAULT_FAILURE_MESSAGE = "Should not happen."
     }
 
-
-    fun start(port: Int) {
+    fun startHttpServerOnPort(port: Int) {
         val vertx = Vertx.vertx()
         val router = Router.router(vertx)
 
-        // Set up routes
+        setupRoutes(router)
+        createServer(vertx, router, port)
+        whenShutdown(vertx)
+    }
+
+    private fun setupRoutes(router: Router) {
+        router.options(Constants.ENDPOINT_BASE_PATH).handler(this::preflightRequest)
         router.get(Constants.ENDPOINT_BASE_PATH).handler(this::getEndpoints)
         router.get("${Constants.ENDPOINT_BASE_PATH}/:id").handler(this::getEndpoint)
-        router.post(Constants.ENDPOINT_BASE_PATH).consumes("*/json").handler(BodyHandler.create()).handler(this::createEndpoint)
-        router.put("${Constants.ENDPOINT_BASE_PATH}/:id").consumes("*/json").handler(BodyHandler.create()).handler(this::updateEndpoint)
+        router.post(Constants.ENDPOINT_BASE_PATH).consumes("*/json").handler(BodyHandler.create())
+            .handler(this::createEndpoint)
+        router.put("${Constants.ENDPOINT_BASE_PATH}/:id").consumes("*/json").handler(BodyHandler.create())
+            .handler(this::updateEndpoint)
         router.delete("${Constants.ENDPOINT_BASE_PATH}/:id").handler(this::deleteEndpoint)
+    }
 
+    private fun createServer(vertx: Vertx, router: Router?, port: Int) {
         vertx.createHttpServer()
             .requestHandler(router)
             .listen(port) { result ->
@@ -52,11 +64,25 @@ class EndpointsController(
                     logger.error("Failed to start the server: ${result.cause()}")
                 }
             }
+    }
 
+    private fun whenShutdown(vertx: Vertx) {
         Runtime.getRuntime().addShutdownHook(Thread {
             logger.info("Shutting down...")
             vertx.close()
         })
+    }
+
+    private fun preflightRequest(context: RoutingContext) {
+        logger.info("request OPTIONS ${Constants.ENDPOINT_BASE_PATH}")
+        // TODO if origin behind a property
+        context.response()
+            .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3000")
+            .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS")
+            .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization")
+            .setStatusCode(HttpResponseStatus.NO_CONTENT.code())
+            .end()
+        logger.info("response OPTIONS ${Constants.ENDPOINT_BASE_PATH} - 204 No Content")
     }
 
     private fun getEndpoints(context: RoutingContext) {
@@ -74,25 +100,26 @@ class EndpointsController(
         logger.info("response GET ${Constants.ENDPOINT_BASE_PATH} - 200 OK")
         context.response()
             .setStatusCode(200)
-            .putHeader("Content-Type", "application/json")
+            .putCommonHeaders()
             .end(Json.encode(EndpointMapper.businessToDto(endpoints)))
     }
 
     private fun handleFailureGetEndpoints(context: RoutingContext, e: EndpointException) =
-        when(e.type) {
+        when (e.type) {
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
+
             else -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end()
             }
         }
@@ -113,7 +140,7 @@ class EndpointsController(
         logger.info("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 200 OK")
         context.response()
             .setStatusCode(200)
-            .putHeader("Content-Type", "application/json")
+            .putCommonHeaders()
             .end(Json.encode(EndpointMapper.businessToDto(endpoint)))
 
     }
@@ -147,32 +174,34 @@ class EndpointsController(
         context.response()
             .setStatusCode(201)
             .putHeader("Location", locationUri)
-            .putHeader("Content-Type", "application/json")
+            .putCommonHeaders()
             .end(Json.encode(EndpointMapper.businessToDto(createdEndpoint)))
     }
 
     private fun handleFailureCreateEndpoint(context: RoutingContext, e: EndpointException) =
-        when(e.type) {
+        when (e.type) {
             ErrorType.INVALID_INPUT -> {
                 logger.info("response POST ${Constants.ENDPOINT_BASE_PATH} - 400 bad request")
                 context.response()
                     .setStatusCode(400)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
+
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response POST ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
+
             else -> {
                 logger.warn("response POST ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end()
             }
         }
@@ -195,38 +224,48 @@ class EndpointsController(
         if (updateEndpointResult.isSuccess) {
             handleSuccessUpdateEndpoint(context, endpointId, updateEndpointResult)
         } else {
-            handleFailureUpdateEndpoint(context, endpointInput.id, updateEndpointResult.exceptionOrNull() as EndpointException)
+            handleFailureUpdateEndpoint(
+                context,
+                endpointInput.id,
+                updateEndpointResult.exceptionOrNull() as EndpointException
+            )
         }
     }
 
-    private fun handleSuccessUpdateEndpoint(context: RoutingContext, id: String, updateEndpointResult: Result<Endpoint>) {
+    private fun handleSuccessUpdateEndpoint(
+        context: RoutingContext,
+        id: String,
+        updateEndpointResult: Result<Endpoint>
+    ) {
         val updatedEndpoint = updateEndpointResult.getOrNull()!!
         logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 200 ok")
         logger.debug(LoggerUtils.displayAsJson(updatedEndpoint))
         context.response()
             .setStatusCode(200)
-            .putHeader("Content-Type", "application/json")
+            .putCommonHeaders()
             .end(Json.encode(EndpointMapper.businessToDto(updatedEndpoint)))
     }
 
     private fun handleFailureUpdateEndpoint(context: RoutingContext, id: String, e: EndpointException) =
-        when(e.type) {
+        when (e.type) {
             ErrorType.ENTITY_NOT_FOUND -> {
                 logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 404 not found")
                 context.response().setStatusCode(404).end()
             }
+
             ErrorType.INVALID_INPUT -> {
                 logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 400 bad request")
                 context.response()
                     .setStatusCode(400)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
+
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
         }
@@ -238,7 +277,11 @@ class EndpointsController(
         if (deleteEndpointResult.isSuccess) {
             handleSuccessDeleteEndpoint(context, endpointId)
         } else {
-            handleFailureGetOrDeleteEndpoint(context, endpointId, deleteEndpointResult.exceptionOrNull() as EndpointException)
+            handleFailureGetOrDeleteEndpoint(
+                context,
+                endpointId,
+                deleteEndpointResult.exceptionOrNull() as EndpointException
+            )
         }
     }
 
@@ -248,23 +291,31 @@ class EndpointsController(
     }
 
     private fun handleFailureGetOrDeleteEndpoint(context: RoutingContext, id: String, e: EndpointException) =
-        when(e.type) {
+        when (e.type) {
             ErrorType.ENTITY_NOT_FOUND -> {
                 logger.info("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 404 not found")
                 context.response().setStatusCode(404).end()
             }
+
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 context.response()
                     .setStatusCode(500)
-                    .putHeader("Content-Type", "application/json")
+                    .putCommonHeaders()
                     .end(Json.encode("error" to e.message))
             }
+
             else -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 context.response().setStatusCode(500).end()
             }
         }
+
+    private fun HttpServerResponse.putCommonHeaders(): HttpServerResponse {
+        return this
+            .putHeader("Content-Type", "application/json")
+            .putHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+    }
 
 }

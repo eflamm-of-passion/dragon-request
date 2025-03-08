@@ -15,4 +15,4 @@ include("application")
 include("repository-sqlite")
 include("logger-slf4j")
 include("infrastructure")
-include("ui")
+//include("ui") // FIXME gradle depencencies between root and submodules

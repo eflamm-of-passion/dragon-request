@@ -27,7 +27,7 @@ class ApplicationDependencyInjector {
         val profile = getProfile(startArguments)
         try {
             val propertyProvider = instantiatePropertyProviderImpl(getPropertyFileName(profile), getPropertyFileName("default"))
-            instantiateController(propertyProvider).start(propertyProvider.httpServerPort())
+            instantiateController(propertyProvider).startHttpServerOnPort(propertyProvider.httpServerPort())
         } catch (e: RuntimeException) {
             logger.error("Failed to load the properties, exiting application")
             exitProcess(1)
