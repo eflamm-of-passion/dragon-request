@@ -4,4 +4,5 @@ plugins {
     alias(uilibs.plugins.composeMultiplatform) apply false
     alias(uilibs.plugins.composeCompiler) apply false
     alias(uilibs.plugins.kotlinMultiplatform) apply false
+    alias(uilibs.plugins.kotlinSerialization) apply false
 }
