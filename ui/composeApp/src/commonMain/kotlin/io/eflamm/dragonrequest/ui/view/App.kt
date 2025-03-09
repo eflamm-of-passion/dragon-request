@@ -10,12 +10,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.material.TextFieldDefaults
@@ -25,8 +25,6 @@ import androidx.compose.material.icons.rounded.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -49,23 +47,23 @@ fun App(endpointViewModel: EndpointViewModel) {
     MaterialTheme {
         executeOnStart()
         val endpoints by endpointViewModel.endpoints.collectAsState(initial = emptyList())
-        val (currentEndpoint, setCurrentEndpoint) = remember { mutableStateOf("https://www.google.com") }
+        val currentEndpoint by endpointViewModel.currentEndpoint.collectAsState(initial = null)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             Column(Modifier.fillMaxHeight().weight(1f).background(color = Color.Cyan)) {
-                EndpointList(endpoints)
+                EndpointList(endpoints, endpointViewModel)
             }
             Column(Modifier.fillMaxHeight().weight(3f)) {
-                EndpointForm(currentEndpoint, setCurrentEndpoint)
+                EndpointForm(currentEndpoint)
             }
         }
     }
 }
 
 @Composable
-fun EndpointList(endpoints: List<Endpoint>) {
+fun EndpointList(endpoints: List<Endpoint>, endpointViewModel: EndpointViewModel) {
     if (endpoints.isNotEmpty()) {
         Column(Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
-            endpoints.forEach { EndpointListItem(it) }
+            endpoints.forEach { EndpointListItem(it, endpointViewModel) }
         }
     } else {
         Column(Modifier.fillMaxWidth(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -75,15 +73,13 @@ fun EndpointList(endpoints: List<Endpoint>) {
 }
 
 @Composable
-fun EndpointListItem(endpoint: Endpoint) {
-    Row(
-        Modifier
+fun EndpointListItem(endpoint: Endpoint, endpointViewModel: EndpointViewModel) {
+    OutlinedButton(
+       onClick = { endpointViewModel.selectEndpoint(endpoint.id) },
+        modifier =         Modifier
             .fillMaxWidth()
             .height(60.dp)
             .padding(top = 8.dp, start = 8.dp, end = 8.dp)
-            .background(color = Color.White, shape = RoundedCornerShape(8.dp)),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
     ) {
         Text(endpoint.httpMethod, style = TextStyle(fontWeight = FontWeight.Bold))
         // TODO add tooltip, it does not seem to be available in compose for the moment
@@ -107,7 +103,7 @@ fun EndpointListItemOptions() {
 }
 
 @Composable
-fun EndpointForm(currentEndpoint: String, setCurrentEndpoint: (String) -> Unit) {
+fun EndpointForm(currentEndpoint: Endpoint?) {
     Column(
         Modifier.fillMaxSize().background(color = Color.LightGray),
         verticalArrangement = Arrangement.Center,
@@ -115,8 +111,8 @@ fun EndpointForm(currentEndpoint: String, setCurrentEndpoint: (String) -> Unit) 
     ) {
         Row(Modifier.fillMaxWidth(0.8f)) {
             TextField(
-                value = currentEndpoint,
-                onValueChange = setCurrentEndpoint,
+                value = currentEndpoint?.url ?: "",
+                onValueChange = {},
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White)
             )

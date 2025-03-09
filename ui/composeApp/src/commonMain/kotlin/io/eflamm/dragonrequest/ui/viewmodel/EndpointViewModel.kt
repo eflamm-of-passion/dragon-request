@@ -1,6 +1,7 @@
 package io.eflamm.dragonrequest.ui.viewmodel
 
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import io.eflamm.dragonrequest.ui.model.Endpoint
@@ -14,8 +15,8 @@ class EndpointViewModel(private val endpointProvider: EndpointProvider): ViewMod
     private val _endpoints = MutableStateFlow<List<Endpoint>>(emptyList())
     val endpoints: StateFlow<List<Endpoint>> = _endpoints.asStateFlow()
 
-    private val _currentEndpoint = mutableStateOf<Endpoint?>(null)
-    val currentEndpoint: Endpoint? get() = _currentEndpoint.value
+    private val _currentEndpoint = MutableStateFlow<Endpoint?>(null)
+    val currentEndpoint: StateFlow<Endpoint?> = _currentEndpoint.asStateFlow()
 
     fun loadEndpoints() {
         viewModelScope.launch {
@@ -24,8 +25,10 @@ class EndpointViewModel(private val endpointProvider: EndpointProvider): ViewMod
         }
     }
 
-    fun selectEndpoint() {
-        // TODO
+    fun selectEndpoint(selectedEndpointId: String) {
+        val selectedEndpoint = _endpoints.value.find { it.id == selectedEndpointId }
+        println(selectedEndpoint?.url)
+        _currentEndpoint.value = selectedEndpoint
     }
 
     fun createEndpoint() {
