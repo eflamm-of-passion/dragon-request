@@ -4,5 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 data class EndpointOutput(
     @JsonProperty("id") val id: String,
+    @JsonProperty("httpMethod") val httpMethod: String,
     @JsonProperty("url") val url: String
 )

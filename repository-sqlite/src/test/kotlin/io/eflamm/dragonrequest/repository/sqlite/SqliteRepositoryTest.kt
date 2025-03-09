@@ -15,16 +15,15 @@ class SqliteRepositoryTest {
 
     // TODO test with an SQLException
 
-    private fun createEndpointWitRandomId(): Endpoint {
-        return Endpoint(
-            Id.create(),
-            Protocol.HTTP,
-            DomainName("acme.org"),
-            Port(80),
-            Path(listOf("path", "more")),
-            QueryParameters(mapOf("one" to "foo", "two" to "bar"))
-        )
-    }
+    private fun createEndpointWitRandomId(): Endpoint = Endpoint(
+        Id.create(),
+        HttpMethod.GET,
+        Protocol.HTTP,
+        DomainName("acme.org"),
+        Port(80),
+        Path(listOf("path", "more")),
+        QueryParameters(mapOf("one" to "foo", "two" to "bar"))
+    )
 
     @BeforeAll
     fun setupDatabase() {
@@ -123,6 +122,7 @@ class SqliteRepositoryTest {
         val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             earlierCreatedEndpoint.id,
+            HttpMethod.GET,
             Protocol.HTTPS,
             DomainName("other-domain.com"),
             Port(8080),
@@ -147,6 +147,7 @@ class SqliteRepositoryTest {
         val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             Id.create(),
+            HttpMethod.GET,
             Protocol.HTTPS,
             DomainName("other-domain.com"),
             Port(8080),

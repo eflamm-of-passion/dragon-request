@@ -4,5 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty
 
 // TODO enable one string constructor
 data class EndpointCreateInput (
+    @JsonProperty("httpMethod") val httpMethod: String,
     @JsonProperty("url") val url: String
 )
