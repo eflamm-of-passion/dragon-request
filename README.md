@@ -20,9 +20,9 @@ To list all the modules that are loaded :
 ```
 
 ## TODO
-
-- check the diagram
-- integrate a frontend
+- display logs when 500
+- fix docker
+- add swagger
 - add hypermedia links
 
 ## Architecture

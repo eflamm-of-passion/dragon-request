@@ -7,4 +7,16 @@ class MockEndpointProvider: EndpointProvider {
             Endpoint("1", "GET", "https://www.google.com", false),
             Endpoint("2", "POST", "https://www.youtube.com", false)
     )
+
+    override suspend fun createEndpoint(endpointToCreate: Endpoint): Endpoint {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun updateEndpoint(endpointToUpdate: Endpoint): Endpoint {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun deleteEndpoint(endpointToDelete: Endpoint) {
+        TODO("Not yet implemented")
+    }
 }

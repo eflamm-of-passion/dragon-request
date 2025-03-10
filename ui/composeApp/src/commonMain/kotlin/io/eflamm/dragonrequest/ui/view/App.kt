@@ -33,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import io.eflamm.dragonrequest.ui.model.Endpoint
+import io.eflamm.dragonrequest.ui.model.EndpointState
 import io.eflamm.dragonrequest.ui.viewmodel.EndpointViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
@@ -40,9 +41,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(endpointViewModel: EndpointViewModel) {
-    fun executeOnStart() {
-        endpointViewModel.loadEndpoints()
-    }
+    fun executeOnStart() = endpointViewModel.loadEndpoints()
 
     MaterialTheme {
         executeOnStart()
@@ -50,20 +49,20 @@ fun App(endpointViewModel: EndpointViewModel) {
         val currentEndpoint by endpointViewModel.currentEndpoint.collectAsState(initial = null)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             Column(Modifier.fillMaxHeight().weight(1f).background(color = Color.Cyan)) {
-                EndpointList(endpoints, endpointViewModel)
+                EndpointList(endpointViewModel, endpoints)
             }
             Column(Modifier.fillMaxHeight().weight(3f)) {
-                EndpointForm(currentEndpoint)
+                EndpointForm(endpointViewModel, currentEndpoint)
             }
         }
     }
 }
 
 @Composable
-fun EndpointList(endpoints: List<Endpoint>, endpointViewModel: EndpointViewModel) {
+fun EndpointList(endpointViewModel: EndpointViewModel, endpoints: List<EndpointState>) {
     if (endpoints.isNotEmpty()) {
         Column(Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
-            endpoints.forEach { EndpointListItem(it, endpointViewModel) }
+            endpoints.forEach { endpoint -> EndpointListItem(endpointViewModel, endpoint) }
         }
     } else {
         Column(Modifier.fillMaxWidth(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
@@ -73,23 +72,23 @@ fun EndpointList(endpoints: List<Endpoint>, endpointViewModel: EndpointViewModel
 }
 
 @Composable
-fun EndpointListItem(endpoint: Endpoint, endpointViewModel: EndpointViewModel) {
+fun EndpointListItem(endpointViewModel: EndpointViewModel, endpoint: EndpointState) {
     OutlinedButton(
-       onClick = { endpointViewModel.selectEndpoint(endpoint.id) },
+       onClick = { endpointViewModel.selectEndpoint(endpoint.modified.id) },
         modifier =         Modifier
             .fillMaxWidth()
             .height(60.dp)
             .padding(top = 8.dp, start = 8.dp, end = 8.dp)
     ) {
-        Text(endpoint.httpMethod, style = TextStyle(fontWeight = FontWeight.Bold))
+        Text(endpoint.modified.httpMethod, style = TextStyle(fontWeight = FontWeight.Bold))
         // TODO add tooltip, it does not seem to be available in compose for the moment
-        Text(endpoint.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        EndpointListItemOptions()
+        Text(endpoint.modified.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
+        EndpointListItemOptions(endpointViewModel)
     }
 }
 
 @Composable
-fun EndpointListItemOptions() {
+fun EndpointListItemOptions(endpointViewModel: EndpointViewModel) {
     Row {
         Icon(
             Icons.Rounded.Save,
@@ -103,7 +102,7 @@ fun EndpointListItemOptions() {
 }
 
 @Composable
-fun EndpointForm(currentEndpoint: Endpoint?) {
+fun EndpointForm(endpointViewModel: EndpointViewModel, currentEndpoint: EndpointState?) {
     Column(
         Modifier.fillMaxSize().background(color = Color.LightGray),
         verticalArrangement = Arrangement.Center,
@@ -111,7 +110,7 @@ fun EndpointForm(currentEndpoint: Endpoint?) {
     ) {
         Row(Modifier.fillMaxWidth(0.8f)) {
             TextField(
-                value = currentEndpoint?.url ?: "",
+                value = currentEndpoint?.modified?.url ?: "",
                 onValueChange = {},
                 modifier = Modifier.fillMaxWidth(),
                 colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White)
@@ -121,7 +120,7 @@ fun EndpointForm(currentEndpoint: Endpoint?) {
             Button(onClick = {}, colors = SendButtonColors()) {
                 Text("Send")
             }
-            Button(onClick = {}, colors = SaveButtonColors()) {
+            Button(onClick = {currentEndpoint?.let { endpointViewModel.saveEndpoint(it) }}, colors = SaveButtonColors()) {
                 Text("Save")
             }
             Button(onClick = {}, colors = DeleteButtonColors()) {
@@ -133,9 +132,7 @@ fun EndpointForm(currentEndpoint: Endpoint?) {
 
 @Composable
 fun SendButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White)
-
 @Composable
 fun SaveButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.White)
-
 @Composable
 fun DeleteButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)

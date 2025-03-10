@@ -12,7 +12,7 @@ import kotlinx.browser.document
 @OptIn(ExperimentalComposeUiApi::class)
 fun main() {
 //    val endpointProvider = MockEndpointProvider()
-    val endpointProvider = RestEndpointProvider()
+    val endpointProvider = RestEndpointProvider("http://localhost:8080")
     ComposeViewport(document.body!!) {
         App(viewModel { EndpointViewModel(endpointProvider) })
     }

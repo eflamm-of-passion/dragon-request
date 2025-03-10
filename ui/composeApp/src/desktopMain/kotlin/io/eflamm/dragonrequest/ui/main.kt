@@ -12,7 +12,7 @@ fun main() = application {
         onCloseRequest = ::exitApplication,
         title = "Dragon reQuest UI",
     ) {
-        val endpointProvider = RestEndpointProvider()
+        val endpointProvider = RestEndpointProvider("http://localhost:8080")
         App(viewModel { EndpointViewModel(endpointProvider) })
     }
 }

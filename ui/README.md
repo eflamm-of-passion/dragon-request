@@ -19,9 +19,15 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
 
-TODO
-- install a HTTP client to call the API
-- get the endpoints from the API
+## TODO
+- branch to all the endpoints
+- handle the results of API
+- add CORS header only if dev mode
+- find a way to debug
+- dark mode
 - logging
 - create a Docker container
 - check what I can do for testing
+
+## Notes to myself
+- I should check the architecture is right
