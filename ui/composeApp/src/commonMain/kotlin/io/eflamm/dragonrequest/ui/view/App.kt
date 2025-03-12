@@ -1,6 +1,7 @@
 package io.eflamm.dragonrequest.ui.view
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
@@ -25,6 +28,8 @@ import androidx.compose.material.icons.rounded.Save
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +37,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.eflamm.dragonrequest.ui.model.Endpoint
 import io.eflamm.dragonrequest.ui.model.EndpointState
 import io.eflamm.dragonrequest.ui.viewmodel.EndpointViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
@@ -41,7 +45,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 @Composable
 @Preview
 fun App(endpointViewModel: EndpointViewModel) {
-    fun executeOnStart() = endpointViewModel.loadEndpoints()
+    fun executeOnStart() = endpointViewModel.getEndpoints()
 
     MaterialTheme {
         executeOnStart()
@@ -83,12 +87,14 @@ fun EndpointListItem(endpointViewModel: EndpointViewModel, endpoint: EndpointSta
         Text(endpoint.modified.httpMethod, style = TextStyle(fontWeight = FontWeight.Bold))
         // TODO add tooltip, it does not seem to be available in compose for the moment
         Text(endpoint.modified.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        EndpointListItemOptions(endpointViewModel)
+        EndpointListItemOptions(endpointViewModel, endpoint)
     }
 }
 
 @Composable
-fun EndpointListItemOptions(endpointViewModel: EndpointViewModel) {
+fun EndpointListItemOptions(endpointViewModel: EndpointViewModel, endpoint: EndpointState) {
+    val isDropDownMenuExpanded = remember { mutableStateOf(false) }
+
     Row {
         Icon(
             Icons.Rounded.Save,
@@ -96,8 +102,20 @@ fun EndpointListItemOptions(endpointViewModel: EndpointViewModel) {
         )
         Icon(
             Icons.Rounded.MoreVert,
-            contentDescription = "More options on this endpoint"
+            contentDescription = "More options on this endpoint",
+            modifier = Modifier.clickable { isDropDownMenuExpanded.value = true }
         )
+        DropdownMenu(
+            expanded = isDropDownMenuExpanded.value,
+            onDismissRequest = { isDropDownMenuExpanded.value = false }
+        ) {
+            DropdownMenuItem(onClick = {
+                isDropDownMenuExpanded.value = false
+                endpointViewModel.deleteEndpoint(endpoint)
+            }) {
+                Text("Delete")
+            }
+        }
     }
 }
 

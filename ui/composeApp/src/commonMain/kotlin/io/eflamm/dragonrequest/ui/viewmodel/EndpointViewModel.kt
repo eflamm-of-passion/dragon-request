@@ -16,7 +16,7 @@ class EndpointViewModel(private val endpointProvider: EndpointProvider): ViewMod
     private val _currentEndpoint = MutableStateFlow<EndpointState?>(null)
     val currentEndpoint: StateFlow<EndpointState?> = _currentEndpoint.asStateFlow()
 
-    fun loadEndpoints() {
+    fun getEndpoints() {
         viewModelScope.launch {
             val endpointsFromApi = async { endpointProvider.getAllEndpoints() }.await()
             val endpointStates = endpointsFromApi.map { EndpointState(it) }
@@ -50,6 +50,7 @@ class EndpointViewModel(private val endpointProvider: EndpointProvider): ViewMod
     fun deleteEndpoint(endpointToDelete: EndpointState) {
         viewModelScope.launch {
             endpointProvider.deleteEndpoint(endpointToDelete.initial)
+            getEndpoints()
         }
     }
 

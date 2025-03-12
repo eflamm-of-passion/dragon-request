@@ -7,5 +7,5 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./build/libs/infrastructure-1.0-SNAPSHOT.jar:/app/dragon-request.jar
+      - ./infrastructure/build/libs/infrastructure-1.0-SNAPSHOT.jar:/app/dragon-request.jar
     command: ["java", "-jar", "/app/dragon-request.jar"]

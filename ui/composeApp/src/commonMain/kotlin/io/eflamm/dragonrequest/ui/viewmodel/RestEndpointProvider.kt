@@ -4,6 +4,7 @@ import io.eflamm.dragonrequest.ui.model.Endpoint
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.client.request.delete
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.post
@@ -54,7 +55,7 @@ class RestEndpointProvider(private val apiUrl: String)
     }
 
     override suspend fun deleteEndpoint(endpointToDelete: Endpoint) {
-        client.post(apiUrl + BASE_PATH + "/" + endpointToDelete.id) {
+        client.delete(apiUrl + BASE_PATH + "/" + endpointToDelete.id) {
             header(HttpHeaders.ContentType, "application/json")
             header(HttpHeaders.Origin, "http://localhost:3000")
         }

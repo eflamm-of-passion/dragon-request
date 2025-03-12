@@ -10,7 +10,7 @@ import io.eflamm.dragonrequest.infrastructure.api.mapper.LoggerUtils
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
-import io.vertx.core.http.HttpServerResponse
+import io.vertx.core.http.HttpMethod
 import io.vertx.core.json.Json
 import io.vertx.core.json.JsonObject
 import io.vertx.ext.web.Router
@@ -44,7 +44,10 @@ class EndpointsController(
     }
 
     private fun setupRoutes(router: Router) {
-        router.options(Constants.ENDPOINT_BASE_PATH).handler(this::preflightRequest)
+        addCorsHeaders(router)
+
+        router.route().method(HttpMethod.OPTIONS).handler(this::preflightRequest)
+
         router.get(Constants.ENDPOINT_BASE_PATH).handler(this::getEndpoints)
         router.get("${Constants.ENDPOINT_BASE_PATH}/:id").handler(this::getEndpoint)
         router.post(Constants.ENDPOINT_BASE_PATH).consumes("*/json").handler(BodyHandler.create())
@@ -52,6 +55,17 @@ class EndpointsController(
         router.put("${Constants.ENDPOINT_BASE_PATH}/:id").consumes("*/json").handler(BodyHandler.create())
             .handler(this::updateEndpoint)
         router.delete("${Constants.ENDPOINT_BASE_PATH}/:id").handler(this::deleteEndpoint)
+    }
+
+    private fun addCorsHeaders(router: Router) {
+        router.route().handler { context ->
+            context.response()
+                .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3000")
+                .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS")
+                .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization")
+                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
+            context.next()
+        }
     }
 
     private fun createServer(vertx: Vertx, router: Router?, port: Int) {
@@ -75,11 +89,11 @@ class EndpointsController(
 
     private fun preflightRequest(context: RoutingContext) {
         logger.info("request OPTIONS ${Constants.ENDPOINT_BASE_PATH}")
-        // TODO if origin behind a property
+        // TODO if allow-origin behind a property
         context.response()
             .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN, "http://localhost:3000")
             .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_METHODS, "GET, POST, PUT, DELETE, OPTIONS")
-            .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type, Authorization")
+            .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_HEADERS, "Content-Type")
             .setStatusCode(HttpResponseStatus.NO_CONTENT.code())
             .end()
         logger.info("response OPTIONS ${Constants.ENDPOINT_BASE_PATH} - 204 No Content")
@@ -99,8 +113,7 @@ class EndpointsController(
         val endpoints = getEndpointResult.getOrNull()!!
         logger.info("response GET ${Constants.ENDPOINT_BASE_PATH} - 200 OK")
         context.response()
-            .setStatusCode(200)
-            .putCommonHeaders()
+            .setStatusCode(HttpResponseStatus.OK.code())
             .end(Json.encode(EndpointMapper.businessToDto(endpoints)))
     }
 
@@ -109,8 +122,7 @@ class EndpointsController(
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end(Json.encode("error" to e.message))
             }
 
@@ -118,8 +130,7 @@ class EndpointsController(
                 logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end()
             }
         }
@@ -139,8 +150,7 @@ class EndpointsController(
         val endpoint = getEndpointResult.getOrNull()!!
         logger.info("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 200 OK")
         context.response()
-            .setStatusCode(200)
-            .putCommonHeaders()
+            .setStatusCode(HttpResponseStatus.OK.code())
             .end(Json.encode(EndpointMapper.businessToDto(endpoint)))
 
     }
@@ -172,9 +182,8 @@ class EndpointsController(
         logger.debug(LoggerUtils.displayAsJson(createdEndpoint))
         val locationUri = URI.create("${Constants.ENDPOINT_BASE_PATH}/${createdEndpoint.id}").toString()
         context.response()
-            .setStatusCode(201)
+            .setStatusCode(HttpResponseStatus.CREATED.code())
             .putHeader("Location", locationUri)
-            .putCommonHeaders()
             .end(Json.encode(EndpointMapper.businessToDto(createdEndpoint)))
     }
 
@@ -183,16 +192,14 @@ class EndpointsController(
             ErrorType.INVALID_INPUT -> {
                 logger.info("response POST ${Constants.ENDPOINT_BASE_PATH} - 400 bad request")
                 context.response()
-                    .setStatusCode(400)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
                     .end(Json.encode("error" to e.message))
             }
 
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response POST ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end(Json.encode("error" to e.message))
             }
 
@@ -200,8 +207,7 @@ class EndpointsController(
                 logger.warn("response POST ${Constants.ENDPOINT_BASE_PATH} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end()
             }
         }
@@ -241,8 +247,7 @@ class EndpointsController(
         logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 200 ok")
         logger.debug(LoggerUtils.displayAsJson(updatedEndpoint))
         context.response()
-            .setStatusCode(200)
-            .putCommonHeaders()
+            .setStatusCode(HttpResponseStatus.OK.code())
             .end(Json.encode(EndpointMapper.businessToDto(updatedEndpoint)))
     }
 
@@ -250,22 +255,20 @@ class EndpointsController(
         when (e.type) {
             ErrorType.ENTITY_NOT_FOUND -> {
                 logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 404 not found")
-                context.response().setStatusCode(404).end()
+                context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end()
             }
 
             ErrorType.INVALID_INPUT -> {
                 logger.info("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 400 bad request")
                 context.response()
-                    .setStatusCode(400)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
                     .end(Json.encode("error" to e.message))
             }
 
             ErrorType.TECHNICAL_ERROR -> {
                 logger.warn("response PUT ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end(Json.encode("error" to e.message))
             }
         }
@@ -287,35 +290,29 @@ class EndpointsController(
 
     private fun handleSuccessDeleteEndpoint(context: RoutingContext, id: String) {
         logger.info("response DELETE ${Constants.ENDPOINT_BASE_PATH}/${id} - 200 ok")
-        context.response().setStatusCode(200).end()
+        context.response()
+            .setStatusCode(HttpResponseStatus.OK.code())
+            .end()
     }
 
     private fun handleFailureGetOrDeleteEndpoint(context: RoutingContext, id: String, e: EndpointException) =
         when (e.type) {
             ErrorType.ENTITY_NOT_FOUND -> {
-                logger.info("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 404 not found")
-                context.response().setStatusCode(404).end()
+                logger.info("response DELETE ${Constants.ENDPOINT_BASE_PATH}/${id} - 404 not found")
+                context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end()
             }
 
             ErrorType.TECHNICAL_ERROR -> {
-                logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
+                logger.warn("response DELETE ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 context.response()
-                    .setStatusCode(500)
-                    .putCommonHeaders()
+                    .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
                     .end(Json.encode("error" to e.message))
             }
 
             else -> {
-                logger.warn("response GET ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
+                logger.warn("response DELETE ${Constants.ENDPOINT_BASE_PATH}/${id} - 500 server error")
                 logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
-                context.response().setStatusCode(500).end()
+                context.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).end()
             }
         }
-
-    private fun HttpServerResponse.putCommonHeaders(): HttpServerResponse {
-        return this
-            .putHeader("Content-Type", "application/json")
-            .putHeader("Access-Control-Allow-Origin", "http://localhost:3000")
-    }
-
 }
