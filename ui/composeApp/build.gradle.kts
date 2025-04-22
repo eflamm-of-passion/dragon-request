@@ -9,6 +9,11 @@ plugins {
     alias(uilibs.plugins.kotlinSerialization)
 }
 
+repositories {
+    mavenCentral()
+    google()
+}
+
 kotlin {
     jvm("desktop")
     
@@ -29,6 +34,9 @@ kotlin {
                     }
                 }
             }
+        }
+        compilerOptions {
+            freeCompilerArgs.add("-Xwasm-debugger-custom-formatters")
         }
         binaries.executable()
     }
@@ -52,6 +60,11 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(libs.ktor.client.content.negotiation)
             implementation(libs.ktor.client.serialization)
+        }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.assertj)
+
         }
         desktopMain.dependencies {
             implementation(compose.desktop.currentOs)

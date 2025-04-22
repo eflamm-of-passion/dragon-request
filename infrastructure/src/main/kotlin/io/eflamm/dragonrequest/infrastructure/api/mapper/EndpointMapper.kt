@@ -25,6 +25,7 @@ class EndpointMapper {
             val uri = URI(endpointCreateInput.url)
             return Endpoint(
                 Id.create(),
+                endpointCreateInput.name,
                 HttpMethod.valueOf(endpointCreateInput.httpMethod),
                 Protocol.fromString(uri.scheme),
                 DomainName(uri.host),
@@ -38,6 +39,7 @@ class EndpointMapper {
             val uri = URI(endpointUpdateInput.url)
             return Endpoint(
                 Id.fromString(endpointUpdateInput.id),
+                endpointUpdateInput.name,
                 HttpMethod.valueOf(endpointUpdateInput.httpMethod),
                 Protocol.fromString(uri.scheme),
                 DomainName(uri.host),
@@ -51,6 +53,7 @@ class EndpointMapper {
 
         fun businessToDto(endpoint: Endpoint): EndpointOutput = EndpointOutput(
             endpoint.id.get(),
+            endpoint.name,
             endpoint.httpMethod.toString(),
             aggregateUrl(endpoint)
         )

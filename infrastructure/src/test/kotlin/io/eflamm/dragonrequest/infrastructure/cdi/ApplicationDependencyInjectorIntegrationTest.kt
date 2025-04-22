@@ -32,6 +32,7 @@ class ApplicationDependencyInjectorIntegrationTest {
     fun `GIVEN a url WHEN post THEN return 201 with the created endpoint`() {
         val body = """
             {
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "http://acme.org/path?param=foo"
             }
@@ -51,6 +52,7 @@ class ApplicationDependencyInjectorIntegrationTest {
     fun `GIVEN a malformed url WHEN post THEN return 400 with error message`() {
         val body = """
             {
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "http//acme.org/path?param=foo"
             }
@@ -111,6 +113,7 @@ class ApplicationDependencyInjectorIntegrationTest {
         val body = """
             {
                 "id": "$expectedId",
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "https://example.org:9091"
             }
@@ -135,6 +138,7 @@ class ApplicationDependencyInjectorIntegrationTest {
         val body = """
             {
                 "id": "$someId",
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "https://example.org:9091"
             }
@@ -155,6 +159,7 @@ class ApplicationDependencyInjectorIntegrationTest {
         val body = """
             {
                 "id": "$expectedId",
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "htps://example.org:9091"
             }
@@ -194,6 +199,7 @@ class ApplicationDependencyInjectorIntegrationTest {
     private fun createTestEndpoint(): String {
         val endpointJson = """
             {
+                "name": "someEndpoint",
                 "httpMethod": "GET",
                 "url": "http://acme.org/path?param=foo"
             }

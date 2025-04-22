@@ -37,14 +37,14 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import io.eflamm.dragonrequest.ui.model.EndpointState
+import io.eflamm.dragonrequest.ui.model.Endpoint
+import io.eflamm.dragonrequest.ui.model.HttpMethod
 import io.eflamm.dragonrequest.ui.viewmodel.EndpointViewModel
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
-
 @Composable
 @Preview
-fun App(endpointViewModel: EndpointViewModel) {
+fun app(endpointViewModel: EndpointViewModel) {
     fun executeOnStart() = endpointViewModel.getEndpoints()
 
     MaterialTheme {
@@ -53,61 +53,89 @@ fun App(endpointViewModel: EndpointViewModel) {
         val currentEndpoint by endpointViewModel.currentEndpoint.collectAsState(initial = null)
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             Column(Modifier.fillMaxHeight().weight(1f).background(color = Color.Cyan)) {
-                EndpointList(endpointViewModel, endpoints)
+                endpointList(endpointViewModel, endpoints)
             }
             Column(Modifier.fillMaxHeight().weight(3f)) {
-                EndpointForm(endpointViewModel, currentEndpoint)
+                endpointForm(endpointViewModel, currentEndpoint)
             }
         }
     }
 }
 
 @Composable
-fun EndpointList(endpointViewModel: EndpointViewModel, endpoints: List<EndpointState>) {
-    if (endpoints.isNotEmpty()) {
-        Column(Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.Top) {
-            endpoints.forEach { endpoint -> EndpointListItem(endpointViewModel, endpoint) }
+fun endpointList(
+    endpointViewModel: EndpointViewModel,
+    endpoints: List<Endpoint>,
+) {
+    Column(Modifier.fillMaxWidth()) {
+        Row(Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
+            if (endpoints.isNotEmpty()) {
+                Column(
+                    Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()),
+                    verticalArrangement = Arrangement.Top,
+                ) {
+                    endpoints.forEach { endpoint -> endpointListItem(endpointViewModel, endpoint) }
+                }
+            } else {
+                Column(
+                    Modifier.fillMaxWidth(1f),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                ) {
+                    Text("No endpoints saved", color = Color.Gray)
+                }
+            }
         }
-    } else {
-        Column(Modifier.fillMaxWidth(1f), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-            Text("No endpoints saved", color = Color.Gray)
+        Row(Modifier.fillMaxWidth().fillMaxHeight(0.1f), horizontalArrangement = Arrangement.Center) {
+            Button(modifier = Modifier.fillMaxWidth(), onClick = {}, colors = addButtonColors()) {
+                Text("Add")
+            }
         }
     }
 }
 
 @Composable
-fun EndpointListItem(endpointViewModel: EndpointViewModel, endpoint: EndpointState) {
+fun endpointListItem(
+    endpointViewModel: EndpointViewModel,
+    endpoint: Endpoint,
+) {
     OutlinedButton(
-       onClick = { endpointViewModel.selectEndpoint(endpoint.modified.id) },
-        modifier =         Modifier
-            .fillMaxWidth()
-            .height(60.dp)
-            .padding(top = 8.dp, start = 8.dp, end = 8.dp)
+        onClick = { endpointViewModel.selectEndpoint(endpoint) },
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(60.dp)
+                .padding(top = 8.dp, start = 8.dp, end = 8.dp),
     ) {
-        Text(endpoint.modified.httpMethod, style = TextStyle(fontWeight = FontWeight.Bold))
-        // TODO add tooltip, it does not seem to be available in compose for the moment
-        Text(endpoint.modified.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
-        EndpointListItemOptions(endpointViewModel, endpoint)
+        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
+            Text(endpoint.httpMethod.name, style = TextStyle(fontWeight = FontWeight.Bold))
+            // TODO add tooltip, it does not seem to be available in compose for the moment
+            Text(endpoint.url, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            endpointListItemOptions(endpointViewModel, endpoint)
+        }
     }
 }
 
 @Composable
-fun EndpointListItemOptions(endpointViewModel: EndpointViewModel, endpoint: EndpointState) {
+fun endpointListItemOptions(
+    endpointViewModel: EndpointViewModel,
+    endpoint: Endpoint,
+) {
     val isDropDownMenuExpanded = remember { mutableStateOf(false) }
 
     Row {
         Icon(
             Icons.Rounded.Save,
-            contentDescription = "Save changes on this endpoint"
+            contentDescription = "Save changes on this endpoint",
         )
         Icon(
             Icons.Rounded.MoreVert,
             contentDescription = "More options on this endpoint",
-            modifier = Modifier.clickable { isDropDownMenuExpanded.value = true }
+            modifier = Modifier.clickable { isDropDownMenuExpanded.value = true },
         )
         DropdownMenu(
             expanded = isDropDownMenuExpanded.value,
-            onDismissRequest = { isDropDownMenuExpanded.value = false }
+            onDismissRequest = { isDropDownMenuExpanded.value = false },
         ) {
             DropdownMenuItem(onClick = {
                 isDropDownMenuExpanded.value = false
@@ -120,28 +148,42 @@ fun EndpointListItemOptions(endpointViewModel: EndpointViewModel, endpoint: Endp
 }
 
 @Composable
-fun EndpointForm(endpointViewModel: EndpointViewModel, currentEndpoint: EndpointState?) {
+fun endpointForm(
+    endpointViewModel: EndpointViewModel,
+    currentEndpoint: Endpoint?,
+) {
     Column(
         Modifier.fillMaxSize().background(color = Color.LightGray),
         verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Row(Modifier.fillMaxWidth(0.8f)) {
-            TextField(
-                value = currentEndpoint?.modified?.url ?: "",
-                onValueChange = {},
-                modifier = Modifier.fillMaxWidth(),
-                colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White)
-            )
+        Row(Modifier.fillMaxWidth(0.8f).height(50.dp)) {
+            httpMethodField(endpointViewModel, currentEndpoint)
+            Column(Modifier.fillMaxWidth(0.9f).fillMaxHeight()) {
+                TextField(
+                    // FIXME
+//                    value = currentEndpoint?.modified?.url ?: "",
+                    value = "",
+                    onValueChange = {},
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(backgroundColor = Color.White),
+                )
+            }
         }
         Row(Modifier.fillMaxWidth(0.5f), horizontalArrangement = Arrangement.SpaceAround) {
-            Button(onClick = {}, colors = SendButtonColors()) {
+            Button(onClick = {}, colors = sendButtonColors()) {
                 Text("Send")
             }
-            Button(onClick = {currentEndpoint?.let { endpointViewModel.saveEndpoint(it) }}, colors = SaveButtonColors()) {
+            Button(
+                onClick = { currentEndpoint?.let { endpointViewModel.saveEndpointOnRemote(it) } },
+                colors = saveButtonColors(),
+            ) {
                 Text("Save")
             }
-            Button(onClick = {}, colors = DeleteButtonColors()) {
+            Button(
+                onClick = { currentEndpoint?.let { endpointViewModel.deleteEndpoint(it) } },
+                colors = deleteButtonColors(),
+            ) {
                 Text("Delete")
             }
         }
@@ -149,8 +191,42 @@ fun EndpointForm(endpointViewModel: EndpointViewModel, currentEndpoint: Endpoint
 }
 
 @Composable
-fun SendButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White)
+fun httpMethodField(
+    endpointViewModel: EndpointViewModel,
+    currentEndpoint: Endpoint?,
+) {
+    val isDropDownMenuExpanded = remember { mutableStateOf(false) }
+
+    Column(Modifier.fillMaxWidth(0.1f).fillMaxHeight()) {
+        OutlinedButton(
+            onClick = { isDropDownMenuExpanded.value = true },
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+        ) {
+            Text(currentEndpoint?.httpMethod?.name ?: "GET", fontWeight = FontWeight.Bold)
+        }
+        DropdownMenu(
+            expanded = isDropDownMenuExpanded.value,
+            onDismissRequest = { isDropDownMenuExpanded.value = false },
+        ) {
+            HttpMethod.entries.forEach { method ->
+                DropdownMenuItem(onClick = {
+                    isDropDownMenuExpanded.value = false
+                }) {
+                    Text(method.name)
+                }
+            }
+        }
+    }
+}
+
 @Composable
-fun SaveButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.White)
+fun sendButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White)
+
 @Composable
-fun DeleteButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
+fun saveButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Green, contentColor = Color.White)
+
+@Composable
+fun deleteButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Red, contentColor = Color.White)
+
+@Composable
+fun addButtonColors() = ButtonDefaults.buttonColors(backgroundColor = Color.Blue, contentColor = Color.White)

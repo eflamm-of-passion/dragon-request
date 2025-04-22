@@ -17,6 +17,7 @@ class SqliteRepositoryTest {
 
     private fun createEndpointWitRandomId(): Endpoint = Endpoint(
         Id.create(),
+        "someEndpoint",
         HttpMethod.GET,
         Protocol.HTTP,
         DomainName("acme.org"),
@@ -122,6 +123,7 @@ class SqliteRepositoryTest {
         val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             earlierCreatedEndpoint.id,
+            "someEndpoint",
             HttpMethod.GET,
             Protocol.HTTPS,
             DomainName("other-domain.com"),
@@ -147,6 +149,7 @@ class SqliteRepositoryTest {
         val earlierCreatedEndpoint = repository.createEndpoint(createEndpointWitRandomId()).getOrNull()!!
         val endpointToUpdate = Endpoint(
             Id.create(),
+            "someEndpoint",
             HttpMethod.GET,
             Protocol.HTTPS,
             DomainName("other-domain.com"),

@@ -1,7 +1,7 @@
 [versions]
 androidx-lifecycle = "2.8.4"
 compose-multiplatform = "1.7.3"
-junit = "4.13.2"
+junit = "5.12.1"
 kotlin = "2.1.0"
 kotlinx-coroutines = "1.10.1"
 ktor = "3.1.1"
@@ -9,7 +9,8 @@ ktor = "3.1.1"
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { module = "org.jetbrains.kotlin:kotlin-test-junit", version.ref = "kotlin" }
-junit = { group = "junit", name = "junit", version.ref = "junit" }
+junit = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
+assertj = { group = "org.assertj", name = "assertj-core", version = "3.26.3" }
 androidx-lifecycle-viewmodel = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-viewmodel-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-viewmodel-compose", version.ref = "androidx-lifecycle" }
 androidx-lifecycle-runtime-compose = { group = "org.jetbrains.androidx.lifecycle", name = "lifecycle-runtime-compose", version.ref = "androidx-lifecycle" }

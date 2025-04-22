@@ -111,7 +111,7 @@ class EndpointsController(
 
     private fun handleSuccessGetEndpoints(context: RoutingContext, getEndpointResult: Result<List<Endpoint>>) {
         val endpoints = getEndpointResult.getOrNull()!!
-        logger.info("response GET ${Constants.ENDPOINT_BASE_PATH} - 200 OK")
+        logger.info("response GET ${Constants.ENDPOINT_BASE_PATH} - 200 OK - ${endpoints.size} results")
         context.response()
             .setStatusCode(HttpResponseStatus.OK.code())
             .end(Json.encode(EndpointMapper.businessToDto(endpoints)))
@@ -160,6 +160,7 @@ class EndpointsController(
         val requestBody: JsonObject = context.body().asJsonObject()
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
+        // TODO handle the IllegalArgumentException if body input is not valid
         val endpointInput: EndpointCreateInput = requestBody.mapTo(EndpointCreateInput::class.java)
 
         val validationErrorMessages = EndpointsValidator.validate(endpointInput)
@@ -218,6 +219,7 @@ class EndpointsController(
         val requestBody: JsonObject = context.body().asJsonObject()
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
+        // TODO handle the IllegalArgumentException if body input is not valid
         val endpointInput: EndpointUpdateInput = requestBody.mapTo(EndpointUpdateInput::class.java)
 
         val validationErrorMessages = EndpointsValidator.validate(endpointId, endpointInput)

@@ -11,7 +11,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a http url with path, params and without port WHEN mapping THEN all values are set`(){
         // given
-        val endpointCreateInput = EndpointCreateInput("GET", "http://acme.org/path?param=foo&more=bar")
+        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "http://acme.org/path?param=foo&more=bar")
 
         // when
         val endpoint = EndpointMapper.dtoToBusiness(endpointCreateInput)
@@ -27,7 +27,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a https url with port and without params and path WHEN mapping THEN all values are set`(){
         // given
-        val endpointCreateInput = EndpointCreateInput("GET","https://acme.org:9091")
+        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET","https://acme.org:9091")
 
         // when
         val endpoint = EndpointMapper.dtoToBusiness(endpointCreateInput)
@@ -43,7 +43,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a https url with a param only WHEN mapping THEN all values are set`(){
         // given
-        val endpointCreateInput = EndpointCreateInput("GET", "https://acme.org?param=foo")
+        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "https://acme.org?param=foo")
 
         // when
         val endpoint = EndpointMapper.dtoToBusiness(endpointCreateInput)
@@ -59,7 +59,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a http url with a trailing slash WHEN mapping THEN all values are set`(){
         // given
-        val endpointCreateInput = EndpointCreateInput("GET", "https://acme.org/")
+        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "https://acme.org/")
 
         // when
         val endpoint = EndpointMapper.dtoToBusiness(endpointCreateInput)
@@ -78,6 +78,7 @@ class EndpointMapperTest {
         val id = Id.create()
         val endpoint = Endpoint(
             id,
+            "someEndpoint",
             HttpMethod.GET,
             Protocol.HTTP,
             DomainName("acme.org"),
@@ -91,6 +92,7 @@ class EndpointMapperTest {
 
         // then
         assertEquals(id.get(), endpointOutput.id)
+        assertEquals("someEndpoint", endpointOutput.name)
         assertEquals("http://acme.org/some/path?param=foo&more=bar", endpointOutput.url)
     }
 
@@ -100,6 +102,7 @@ class EndpointMapperTest {
         val id = Id.create()
         val endpoint = Endpoint(
             id,
+            "someEndpoint",
             HttpMethod.GET,
             Protocol.HTTPS,
             DomainName("acme.org"),
@@ -113,6 +116,7 @@ class EndpointMapperTest {
 
         // then
         assertEquals(id.get(), endpointOutput.id)
+        assertEquals("someEndpoint", endpointOutput.name)
         assertEquals("https://acme.org:9091", endpointOutput.url)
     }
 }

@@ -43,16 +43,17 @@ class SqliteRepository(private val databaseFilePath: String, private val logger:
 
     override fun createEndpoint(endpoint: Endpoint): Result<Endpoint> {
         try {
-            val query = "INSERT INTO endpoints (id, httpMethod, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?,?)"
+            val query = "INSERT INTO endpoints (id, name, httpMethod, protocol, domain, port, path, queryParameters) VALUES (?,?,?,?,?,?,?,?)"
 
             executeChangeQuery(query) { statement ->
                 statement.setString(1, endpoint.id.get())
-                statement.setString(2, endpoint.httpMethod.toString())
-                statement.setString(3, endpoint.protocol.get())
-                statement.setString(4, endpoint.domain.get())
-                statement.setInt(5, endpoint.port.get())
-                statement.setString(6, endpoint.path.aggregate())
-                statement.setString(7, endpoint.queryParameters.aggregate())
+                statement.setString(2, endpoint.name)
+                statement.setString(3, endpoint.httpMethod.toString())
+                statement.setString(4, endpoint.protocol.get())
+                statement.setString(5, endpoint.domain.get())
+                statement.setInt(6, endpoint.port.get())
+                statement.setString(7, endpoint.path.aggregate())
+                statement.setString(8, endpoint.queryParameters.aggregate())
             }
 
             return getEndpoint(Id.fromString(endpoint.id.get()))
@@ -64,7 +65,8 @@ class SqliteRepository(private val databaseFilePath: String, private val logger:
     override fun updateEndpoint(endpointUpdated: Endpoint): Result<Endpoint> {
         try {
             val query = """
-                UPDATE endpoints SET 
+                UPDATE endpoints SET
+                    name = ?, 
                     protocol = ?, 
                     httpMethod = ?,
                     domain = ?, 
@@ -75,13 +77,14 @@ class SqliteRepository(private val databaseFilePath: String, private val logger:
             """.trimIndent()
 
             executeChangeQuery(query) { statement ->
-                statement.setString(1, endpointUpdated.protocol.get())
-                statement.setString(2, endpointUpdated.httpMethod.toString())
-                statement.setString(3, endpointUpdated.domain.get())
-                statement.setInt(4, endpointUpdated.port.get())
-                statement.setString(5, endpointUpdated.path.aggregate())
-                statement.setString(6, endpointUpdated.queryParameters.aggregate())
-                statement.setString(7, endpointUpdated.id.get())
+                statement.setString(1, endpointUpdated.name)
+                statement.setString(2, endpointUpdated.protocol.get())
+                statement.setString(3, endpointUpdated.httpMethod.toString())
+                statement.setString(4, endpointUpdated.domain.get())
+                statement.setInt(5, endpointUpdated.port.get())
+                statement.setString(6, endpointUpdated.path.aggregate())
+                statement.setString(7, endpointUpdated.queryParameters.aggregate())
+                statement.setString(8, endpointUpdated.id.get())
             }
 
             return getEndpoint(endpointUpdated.id)
@@ -109,6 +112,7 @@ class SqliteRepository(private val databaseFilePath: String, private val logger:
     private fun createEndpointFromResultSet(resultSet: ResultSet): Endpoint {
         return Endpoint(
             Id.fromString(resultSet.getString("id")),
+            resultSet.getString("name"),
             HttpMethod.valueOf(resultSet.getString("httpMethod")),
             Protocol.fromString(resultSet.getString("protocol")),
             DomainName(resultSet.getString("domain")),
@@ -146,6 +150,7 @@ class SqliteRepository(private val databaseFilePath: String, private val logger:
         val query = """
             CREATE TABLE IF NOT EXISTS endpoints (
                 id TEXT PRIMARY KEY,
+                name TEXT NOT NULL,
                 httpMethod TEXT NOT NULL,
                 protocol TEXT NOT NULL,
                 domain TEXT NOT NULL,
