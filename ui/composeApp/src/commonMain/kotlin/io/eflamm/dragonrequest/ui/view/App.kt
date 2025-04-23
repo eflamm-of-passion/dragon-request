@@ -67,8 +67,8 @@ fun endpointList(
     endpointViewModel: EndpointViewModel,
     endpoints: List<Endpoint>,
 ) {
-    Column(Modifier.fillMaxWidth()) {
-        Row(Modifier.fillMaxWidth().fillMaxHeight(0.9f)) {
+    Column(Modifier.fillMaxSize()) {
+        Row(Modifier.fillMaxWidth().weight(0.9f)) {
             if (endpoints.isNotEmpty()) {
                 Column(
                     Modifier.fillMaxWidth(1f).verticalScroll(rememberScrollState()),
@@ -86,8 +86,12 @@ fun endpointList(
                 }
             }
         }
-        Row(Modifier.fillMaxWidth().fillMaxHeight(0.1f), horizontalArrangement = Arrangement.Center) {
-            Button(modifier = Modifier.fillMaxWidth(), onClick = {}, colors = addButtonColors()) {
+        Row(
+            Modifier.fillMaxWidth().weight(0.1f),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Button(modifier = Modifier.fillMaxWidth(0.8f).height(48.dp), onClick = {}, colors = addButtonColors()) {
                 Text("Add")
             }
         }
