@@ -50,7 +50,13 @@ fun app(endpointViewModel: EndpointViewModel) {
     MaterialTheme {
         executeOnStart()
         val endpoints by endpointViewModel.endpoints.collectAsState(initial = emptyList())
-        val currentEndpoint by endpointViewModel.currentEndpoint.collectAsState(initial = null)
+        val currentFile by endpointViewModel.currentEndpoint.collectAsState(initial = null)
+        val currentEndpoint =
+            if (currentFile is Endpoint) {
+                currentFile as Endpoint
+            } else {
+                null // FIXME refacto this horror
+            }
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
             Column(Modifier.fillMaxHeight().weight(1f).background(color = Color.Cyan)) {
                 endpointList(endpointViewModel, endpoints)
@@ -104,7 +110,7 @@ fun endpointListItem(
     endpoint: Endpoint,
 ) {
     OutlinedButton(
-        onClick = { endpointViewModel.selectEndpoint(endpoint) },
+        onClick = { endpointViewModel.selectFile(endpoint) },
         modifier =
             Modifier
                 .fillMaxWidth()

@@ -7,8 +7,20 @@ import io.eflamm.dragonrequest.ui.model.HttpMethod
 class MockEndpointProvider : EndpointProvider {
     private var endpoints =
         mutableListOf(
-            Endpoint("1", EndpointState.SavedRemoteUnedited, "Google", HttpMethod.GET, "https://www.google.com"),
-            Endpoint("2", EndpointState.SavedRemoteUnedited, "Youtube", HttpMethod.POST, "https://www.youtube.com"),
+            Endpoint(
+                id = "1",
+                state = EndpointState.SavedRemoteUnedited,
+                name = "Google",
+                httpMethod = HttpMethod.GET,
+                url = "https://www.google.com",
+            ),
+            Endpoint(
+                id = "2",
+                state = EndpointState.SavedRemoteUnedited,
+                name = "Youtube",
+                httpMethod = HttpMethod.POST,
+                url = "https://www.youtube.com",
+            ),
         )
 
     override suspend fun getAllEndpoints(): Result<List<Endpoint>> = Result.success(endpoints)

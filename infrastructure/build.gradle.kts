@@ -23,7 +23,7 @@ dependencies {
     implementation(platform(libs.vertx.stack))
     implementation(libs.vertx.web)
     testImplementation(kotlin("test"))
-    
+
     testImplementation(libs.assertj)
     testImplementation(libs.restassured)
     testImplementation(libs.hamcrest)
@@ -46,6 +46,6 @@ tasks.jar {
         attributes["Main-Class"] = "io.eflamm.dragonrequest.infrastructure.cdi.ApplicationDependencyInjectorKt"
     }
     from(
-        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) }
+        configurations.runtimeClasspath.get().map { if (it.isDirectory) it else zipTree(it) },
     )
 }

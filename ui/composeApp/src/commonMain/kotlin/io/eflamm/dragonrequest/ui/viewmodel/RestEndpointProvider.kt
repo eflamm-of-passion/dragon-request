@@ -45,7 +45,6 @@ class RestEndpointProvider(
         } else {
             Result.failure(Exception("Something happened while fetching the endpoints"))
         }
-
     }
 
     override suspend fun createEndpoint(endpointToCreate: Endpoint): Result<Endpoint> {
@@ -94,13 +93,12 @@ class RestEndpointProvider(
         header(HttpHeaders.Origin, "http://localhost:3000")
     }
 
-    private fun mapToModel(endpointDto: EndpointDto): Endpoint {
-        return Endpoint(
+    private fun mapToModel(endpointDto: EndpointDto): Endpoint =
+        Endpoint(
             id = endpointDto.id,
             name = endpointDto.name,
             httpMethod = HttpMethod.valueOf(endpointDto.httpMethod), // TODO handle wrong parsing
             url = endpointDto.url,
-            state = EndpointState.SavedRemoteUnedited
+            state = EndpointState.SavedRemoteUnedited,
         )
-    }
 }

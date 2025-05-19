@@ -8,15 +8,11 @@ import io.eflamm.dragonrequest.ui.model.EndpointState.SavedRemoteUnedited
 
 class Endpoint(
     var id: String,
-    private var state: EndpointState,
+    private var state: EndpointState = Initiated,
     var name: String,
     var httpMethod: HttpMethod,
     var url: String,
-) : ApiFile {
-    init {
-        state = Initiated
-    }
-
+) : InternalApiFile() {
     // TODO edit endpoint, save endpoint, save endpoint and synchronize it to repo
 
     fun changeState(nextState: EndpointState) {
@@ -56,7 +52,7 @@ class Endpoint(
         url = snapshotToRestore.url
     }
 
-    override fun addFile(fileToAdd: ApiFile): Result<Int> {
+    override fun addFile(fileToAdd: InternalApiFile): Result<Int> {
         TODO("Not yet implemented")
     }
 

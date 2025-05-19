@@ -2,21 +2,13 @@ package io.eflamm.dragonrequest.ui.model
 
 class Collection(
     private var name: String,
-) : ApiFile {
-    private val children = mutableListOf<ApiFile>()
-
-    override fun addFile(fileToAdd: ApiFile): Result<Int> =
+) : InternalApiFile() {
+    override fun addFile(fileToAdd: InternalApiFile): Result<Int> =
         when (fileToAdd) {
-            is Endpoint -> addChild(fileToAdd)
-            is Collection -> addChild(fileToAdd)
-            is Workspace -> Result.failure(IllegalArgumentException("${fileToAdd::class} cannot be added to ${this::class}"))
+            is Endpoint -> super.addFile(fileToAdd)
+            is Collection -> super.addFile(fileToAdd)
+            else -> Result.failure(IllegalArgumentException("${fileToAdd::class} cannot be added to ${this::class}"))
         }
-
-    private fun addChild(fileToAdd: ApiFile): Result<Int> {
-        children.add(fileToAdd)
-        val childIndex = children.size
-        return Result.success(childIndex)
-    }
 
     override fun moveFile() {
         TODO("Not yet implemented")

@@ -31,3 +31,8 @@ You can open the web application by running the `:composeApp:wasmJsBrowserDevelo
 
 ## Notes to myself
 - I should check the architecture is right
+
+- click Add
+- create initiated endpoint
+- select current endpoint
+- fill the form

@@ -1,16 +1,19 @@
 package io.eflamm.dragonrequest.ui.model
 
-open class Workspace(
-    var name: String,
-) : InternalApiFile() {
-    // TODO implement memento and states, because it has to be saved in the repo as well
+object RootFile : ApiFile {
+    val children: MutableList<InternalApiFile> = mutableListOf()
 
     override fun addFile(fileToAdd: InternalApiFile): Result<Int> =
         when (fileToAdd) {
-            is Endpoint -> super.addFile(fileToAdd)
-            is Collection -> super.addFile(fileToAdd)
+            is Workspace -> addWorkspace(fileToAdd)
             else -> Result.failure(IllegalArgumentException("${fileToAdd::class} cannot be added to ${this::class}"))
         }
+
+    private fun addWorkspace(workspaceToAdd: Workspace): Result<Int> {
+        this.children.add(workspaceToAdd)
+        workspaceToAdd.parent = this
+        return Result.success(this.children.size)
+    }
 
     override fun moveFile() {
         TODO("Not yet implemented")
