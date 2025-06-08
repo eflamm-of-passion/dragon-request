@@ -1,8 +1,8 @@
 package io.eflamm.dragonrequest.ui.viewmodel
 
 import io.eflamm.dragonrequest.ui.model.Endpoint
-import io.eflamm.dragonrequest.ui.model.EndpointState
 import io.eflamm.dragonrequest.ui.model.HttpMethod
+import io.eflamm.dragonrequest.ui.model.states.SavedRemoteUnedited
 import io.eflamm.dragonrequest.ui.viewmodel.dto.EndpointDto
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -99,6 +99,6 @@ class RestEndpointProvider(
             name = endpointDto.name,
             httpMethod = HttpMethod.valueOf(endpointDto.httpMethod), // TODO handle wrong parsing
             url = endpointDto.url,
-            state = EndpointState.SavedRemoteUnedited,
+            state = SavedRemoteUnedited(),
         )
 }

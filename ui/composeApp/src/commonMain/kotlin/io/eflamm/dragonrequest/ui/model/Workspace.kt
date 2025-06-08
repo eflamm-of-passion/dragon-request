@@ -1,8 +1,16 @@
 package io.eflamm.dragonrequest.ui.model
 
+import io.eflamm.dragonrequest.ui.model.states.ApiFileState
+import io.eflamm.dragonrequest.ui.model.states.Initiated
+
 open class Workspace(
-    var name: String,
-) : InternalApiFile() {
+    id: String,
+    state: ApiFileState,
+    name: String,
+) : InternalApiFile(id, name, state) {
+    constructor() : this("", Initiated(), "New workspace")
+    constructor(name: String) : this("", Initiated(), name)
+
     // TODO implement memento and states, because it has to be saved in the repo as well
 
     override fun addFile(fileToAdd: InternalApiFile): Result<Int> =

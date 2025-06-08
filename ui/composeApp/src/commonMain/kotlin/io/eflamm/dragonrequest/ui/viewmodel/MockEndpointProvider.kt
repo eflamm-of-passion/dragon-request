@@ -1,22 +1,22 @@
 package io.eflamm.dragonrequest.ui.viewmodel
 
 import io.eflamm.dragonrequest.ui.model.Endpoint
-import io.eflamm.dragonrequest.ui.model.EndpointState
 import io.eflamm.dragonrequest.ui.model.HttpMethod
+import io.eflamm.dragonrequest.ui.model.states.SavedRemoteUnedited
 
 class MockEndpointProvider : EndpointProvider {
     private var endpoints =
         mutableListOf(
             Endpoint(
                 id = "1",
-                state = EndpointState.SavedRemoteUnedited,
+                state = SavedRemoteUnedited(),
                 name = "Google",
                 httpMethod = HttpMethod.GET,
                 url = "https://www.google.com",
             ),
             Endpoint(
                 id = "2",
-                state = EndpointState.SavedRemoteUnedited,
+                state = SavedRemoteUnedited(),
                 name = "Youtube",
                 httpMethod = HttpMethod.POST,
                 url = "https://www.youtube.com",

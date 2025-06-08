@@ -1,5 +1,6 @@
 package io.eflamm.dragonrequest.ui.model
 
+import io.eflamm.dragonrequest.ui.model.states.Initiated
 import kotlin.test.Test
 
 class ApiFileTest {
@@ -14,7 +15,7 @@ class ApiFileTest {
         val initiatedEndpoint =
             Endpoint(
                 id = "initial id",
-                state = EndpointState.Initiated,
+                state = Initiated(),
                 name = "Initial endpoint",
                 httpMethod = HttpMethod.GET,
                 url = "google.com",
@@ -22,7 +23,7 @@ class ApiFileTest {
         val savedEndpoint =
             Endpoint(
                 id = "saved id",
-                state = EndpointState.Initiated,
+                state = Initiated(),
                 name = "Saved endpoint",
                 httpMethod = HttpMethod.GET,
                 url = "youtube.com",

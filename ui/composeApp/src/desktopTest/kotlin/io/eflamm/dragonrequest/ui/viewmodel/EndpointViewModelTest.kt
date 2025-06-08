@@ -6,9 +6,15 @@ import io.eflamm.dragonrequest.ui.model.RootFile
 import io.eflamm.dragonrequest.ui.model.Workspace
 import io.mockk.mockk
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.After
 import kotlin.test.Test
 
 class EndpointViewModelTest {
+    @After
+    fun tearDown() {
+        RootFile.removeAllFiles()
+    }
+
     @Test
     fun `GIVEN nothing WHEN startup the app THEN a new workspace is created with a new initiated endpoint that is selected`() {
         // note : no api file is orphaned
@@ -17,8 +23,7 @@ class EndpointViewModelTest {
         val endpointViewModel = EndpointViewModel(endpointProvider)
 
         // when
-        endpointViewModel.initEndpointFromRoot()
-        val selectedEndpoint = endpointViewModel.currentEndpoint.value as Endpoint
+        val selectedEndpoint = endpointViewModel.selectedFile.value as Endpoint
         val defaultWorkspace = selectedEndpoint.parent
 
         // then
@@ -34,11 +39,11 @@ class EndpointViewModelTest {
         assertThat(selectedEndpoint.url).isEqualTo("https://example.org")
 
         // the default workspace should have the initiated endpoint in its children
-        assertThat(defaultWorkspace.children.size).isEqualTo(1)
-        assertThat(defaultWorkspace.children.first()).isEqualTo(selectedEndpoint)
+        assertThat(defaultWorkspace.getFiles().size).isEqualTo(1)
+        assertThat(defaultWorkspace.getFiles().first()).isEqualTo(selectedEndpoint)
 
         // the root file has the default workspace in its children
-        assertThat(RootFile.children.first()).isEqualTo(defaultWorkspace)
+        assertThat(RootFile.getFiles().first()).isEqualTo(defaultWorkspace)
     }
 
     @Test
@@ -46,13 +51,26 @@ class EndpointViewModelTest {
         // given
         val endpointProvider: EndpointProvider = mockk()
         val endpointViewModel = EndpointViewModel(endpointProvider)
-        val newWorkspace = Workspace("new workspace")
 
         // when
-        // TODO probably I will add Strategy
-        // TODO add a State to the Workspace
-        
+        endpointViewModel.initAndSelectWorkspace("again a new workspace")
 
         // then
+        assertThat(endpointViewModel.rootFile.getFiles().size).isEqualTo(2) // both default and new workspace
+        assertThat((endpointViewModel.rootFile.getFiles()[1] as Workspace).name).isEqualTo("again a new workspace")
+    }
+
+    @Test
+    fun `GIVEN app is initiated WHEN creating a new endpoint on default workspace THEN the endpoint is created`() {
+        // given
+        val endpointProvider: EndpointProvider = mockk()
+        val endpointViewModel = EndpointViewModel(endpointProvider)
+        val defaultWorkspace = endpointViewModel.rootFile.getFiles().first() as Workspace
+
+        // when
+        endpointViewModel.initEndpointFromDefaultWorkspace()
+
+        // then
+        assertThat(defaultWorkspace.getFiles().size).isEqualTo(2)
     }
 }

@@ -1,101 +1,64 @@
 package io.eflamm.dragonrequest.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import io.eflamm.dragonrequest.ui.model.ApiFile
 import io.eflamm.dragonrequest.ui.model.Endpoint
-import io.eflamm.dragonrequest.ui.model.HttpMethod
 import io.eflamm.dragonrequest.ui.model.RootFile
 import io.eflamm.dragonrequest.ui.model.Workspace
-import kotlinx.coroutines.async
+import io.eflamm.dragonrequest.ui.view.tree.Node
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
 
 class EndpointViewModel(
     private val endpointProvider: EndpointProvider,
 ) : ViewModel() {
-    private val rootFile = RootFile
-    private val defaultWorkspace: Workspace = Workspace(name = "My workspace")
-    private val _endpoints = MutableStateFlow<List<Endpoint>>(emptyList())
-    val endpoints: StateFlow<List<Endpoint>> = _endpoints.asStateFlow()
+    val rootFile = RootFile
+    private lateinit var defaultWorkspace: Workspace
+
+    private val _selectedFile = MutableStateFlow<ApiFile?>(null)
+    val selectedFile: StateFlow<ApiFile?> = _selectedFile.asStateFlow()
 
     init {
-        this.rootFile.addFile(this.defaultWorkspace)
-    }
-
-    private val _currentEndpoint = MutableStateFlow<ApiFile?>(null)
-    val currentEndpoint: StateFlow<ApiFile?> = _currentEndpoint.asStateFlow()
-
-    fun startUp() {
-        val endpoints = getEndpoints()
-        // TODO select the default workspace
-        // TODO add all the endpoints to the workspace
-    }
-
-    fun getEndpoints() =
-        viewModelScope.launch {
-            // TODO get all the endpoints from local
-            // TODO get all the endpoints from API
-            // TODO synchronize all the endpoints from API with locals
-
-            val endpointsFromApi = async { endpointProvider.getAllEndpoints() }.await()
-            if (endpointsFromApi.isSuccess) {
-                _endpoints.emit(endpointsFromApi.getOrNull() ?: emptyList())
-            } else {
-                TODO("display an error message")
-            }
+        if (false) {
+            // TODO check if data, then load
+        } else {
+            firstStartup()
         }
+    }
+
+    private fun firstStartup() {
+        // UC : the user starts the app for the first time
+        this.initAndSelectWorkspace("My workspace")
+        this.defaultWorkspace = _selectedFile.value as Workspace
+        this.initEndpointFromDefaultWorkspace()
+    }
 
     fun selectFile(selectedFile: ApiFile) {
-        _currentEndpoint.value = selectedFile
+        // UC : the user clicks on a file in the list
+        _selectedFile.value = selectedFile
     }
 
-    fun initEndpointFromRoot() = initEndpoint(defaultWorkspace)
+    fun initAndSelectFile(parentFile: ApiFile) {
+        // TODO I wonder how I could pass the type to create as input
 
-    fun initEndpoint(parentFile: ApiFile) {
-        val initiatedEndpoint =
-            Endpoint(
-                id = "",
-                name = "New endpoint",
-                httpMethod = HttpMethod.GET,
-                url = "https://example.org",
-            )
+        // UC : the user creates an endpoint from a selected file
+        // TODO i should put as argument which class I want to init
+        val initiatedEndpoint = Endpoint()
+        // TODO try to add to parent, handle the result
         parentFile.addFile(initiatedEndpoint)
-        this.selectFile(initiatedEndpoint)
+        selectFile(initiatedEndpoint)
     }
 
-    fun createEndpoint(endpointToCreate: Endpoint) =
-        viewModelScope.launch {
-            // TODO create the endpoint using the API
-            // TODO transform the initiated endpoint in a saved endpoint
+    fun initEndpointFromDefaultWorkspace() = initAndSelectFile(defaultWorkspace) // UC : the user click on Add an Endpoint
 
-//            val newEndpoint = endpointProvider.createEndpoint(endpointToCreate)
-//            _endpoints.emit(_endpoints.value + newEndpointState)
-        }
-
-    fun updateSavedEndpoint(endpointToUpdate: Endpoint) =
-        viewModelScope.launch {
-            // TODO send the endpoint to the API
-            // TODO update the endpoint with the response
-        }
-
-    fun saveEndpointOnRemote(endpointToSave: Endpoint) =
-        viewModelScope.launch {
-            // TODO when initiated endpoint then create
-            // TODO when saved endpoint then update
-        }
-
-    fun deleteEndpoint(endpointToDelete: Endpoint) =
-        viewModelScope.launch {
-            // TODO when saved endpoint then delete using the API
-            // TODO remove from the list
-//            endpointProvider.deleteEndpoint(endpointToDelete)
-//            getEndpoints()
-        }
-
-    fun initWorkspace(workspaceName: String) {
-        RootFile.addFile(Workspace(workspaceName))
+    fun initAndSelectWorkspace(workspaceName: String) {
+        // UC : the clicks on the button to create a new workspace
+        val initiatedWorkspace = Workspace(workspaceName)
+        RootFile.addFile(initiatedWorkspace)
+        selectFile(initiatedWorkspace)
     }
+
+    // UC : the file tree is displayed after the data is loaded, and each time it is updated
+    fun loadFileTree(): Node = FileTreeMapper.apiFileToTreeNode(rootFile, 0)
 }

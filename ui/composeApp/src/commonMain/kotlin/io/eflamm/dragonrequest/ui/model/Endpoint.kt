@@ -1,41 +1,18 @@
 package io.eflamm.dragonrequest.ui.model
 
-import io.eflamm.dragonrequest.ui.model.EndpointState.Initiated
-import io.eflamm.dragonrequest.ui.model.EndpointState.SavedLocalEdited
-import io.eflamm.dragonrequest.ui.model.EndpointState.SavedLocalUnedited
-import io.eflamm.dragonrequest.ui.model.EndpointState.SavedRemoteEdited
-import io.eflamm.dragonrequest.ui.model.EndpointState.SavedRemoteUnedited
+import io.eflamm.dragonrequest.ui.model.states.ApiFileState
+import io.eflamm.dragonrequest.ui.model.states.Initiated
 
 class Endpoint(
-    var id: String,
-    private var state: EndpointState = Initiated,
-    var name: String,
+    id: String,
+    state: ApiFileState,
+    name: String,
     var httpMethod: HttpMethod,
     var url: String,
-) : InternalApiFile() {
+) : InternalApiFile(id, name, state) {
     // TODO edit endpoint, save endpoint, save endpoint and synchronize it to repo
 
-    fun changeState(nextState: EndpointState) {
-        if (canChangeToState(nextState).isSuccess) {
-            this.state = nextState
-        }
-    }
-
-    private fun canChangeToState(nextState: EndpointState): Result<Unit> {
-        val canChange =
-            when (this.state) {
-                is Initiated -> nextState == SavedLocalEdited
-                SavedLocalUnedited -> setOf(SavedLocalEdited, SavedRemoteUnedited).contains(nextState)
-                SavedLocalEdited -> setOf(SavedLocalUnedited, SavedRemoteUnedited).contains(nextState)
-                SavedRemoteUnedited -> nextState == SavedRemoteEdited
-                SavedRemoteEdited -> nextState == SavedRemoteUnedited
-            }
-        return if (canChange) {
-            Result.success(Unit)
-        } else {
-            Result.failure(IllegalArgumentException("Cannot go from ${this.state} to $nextState"))
-        }
-    }
+    constructor() : this(id = "", state = Initiated(), name = "New endpoint", httpMethod = HttpMethod.GET, url = "https://example.org")
 
     fun saveSnapshot(): EndpointSnapshot =
         EndpointSnapshot(
@@ -45,12 +22,6 @@ class Endpoint(
             url = url,
         )
 
-    fun restoreSnapshot(snapshotToRestore: EndpointSnapshot) {
-        state = snapshotToRestore.state
-        name = snapshotToRestore.name
-        httpMethod = snapshotToRestore.httpMethod
-        url = snapshotToRestore.url
-    }
 
     override fun addFile(fileToAdd: InternalApiFile): Result<Int> {
         TODO("Not yet implemented")

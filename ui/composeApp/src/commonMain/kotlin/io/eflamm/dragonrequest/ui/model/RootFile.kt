@@ -1,7 +1,9 @@
 package io.eflamm.dragonrequest.ui.model
 
 object RootFile : ApiFile {
-    val children: MutableList<InternalApiFile> = mutableListOf()
+    private val children: MutableList<InternalApiFile> = mutableListOf()
+
+    override fun getFiles(): List<ApiFile> = children.toList()
 
     override fun addFile(fileToAdd: InternalApiFile): Result<Int> =
         when (fileToAdd) {
@@ -23,7 +25,12 @@ object RootFile : ApiFile {
         TODO("Not yet implemented")
     }
 
+    override fun removeAllFiles() = children.clear()
+
     override fun nextFileIndex(): Int {
         TODO("Not yet implemented")
     }
+
+    override val name: String
+        get() = "Root"
 }

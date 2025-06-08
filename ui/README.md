@@ -19,7 +19,7 @@ Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-mu
 
 You can open the web application by running the `:composeApp:wasmJsBrowserDevelopmentRun` Gradle task.
 
-## TODO
+## Roadmap
 - branch to all the endpoints
 - handle the results of API
 - add CORS header only if dev mode
@@ -28,9 +28,13 @@ You can open the web application by running the `:composeApp:wasmJsBrowserDevelo
 - logging
 - create a Docker container
 - check what I can do for testing
+- store the endpoints on local storage before synchronizing on remote
 
-## Notes to myself
-- I should check the architecture is right
+## Tasks
+
+- initiate the app
+  - with the default workspace appearing in the left panel
+    - display all the root file, probably chain of command
 
 - click Add
 - create initiated endpoint

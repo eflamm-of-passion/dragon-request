@@ -1,8 +1,15 @@
 package io.eflamm.dragonrequest.ui.model
 
+import io.eflamm.dragonrequest.ui.model.states.ApiFileState
+import io.eflamm.dragonrequest.ui.model.states.Initiated
+
 class Collection(
-    private var name: String,
-) : InternalApiFile() {
+    id: String,
+    state: ApiFileState,
+    name: String,
+) : InternalApiFile(id, name, state) {
+    constructor(name: String) : this("", Initiated(), name)
+
     override fun addFile(fileToAdd: InternalApiFile): Result<Int> =
         when (fileToAdd) {
             is Endpoint -> super.addFile(fileToAdd)
