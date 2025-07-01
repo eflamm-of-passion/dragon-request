@@ -9,3 +9,17 @@ services:
     volumes:
       - ./infrastructure/build/libs/infrastructure-1.0-SNAPSHOT.jar:/app/dragon-request.jar
     command: ["java", "-jar", "/app/dragon-request.jar"]
+    depends_on:
+      mongo:
+        condition: service_healthy
+  mongo:
+    image: mongo:latest
+    container_name: dragon_request_mongo
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 5s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

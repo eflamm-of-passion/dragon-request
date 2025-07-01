@@ -32,9 +32,10 @@ You can open the web application by running the `:composeApp:wasmJsBrowserDevelo
 
 ## Tasks
 
-- initiate the app
-  - with the default workspace appearing in the left panel
-    - display all the root file, probably chain of command
+- load the endpoints from the API
+  - rework the model in the API
+  - call the API
+  - map the API model to the front model
 
 - click Add
 - create initiated endpoint

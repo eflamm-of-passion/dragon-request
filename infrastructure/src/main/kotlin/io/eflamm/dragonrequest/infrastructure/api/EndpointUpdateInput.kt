@@ -8,4 +8,5 @@ data class EndpointUpdateInput (
     @JsonProperty("name") val name: String,
     @JsonProperty("httpMethod") val httpMethod: String,
     @JsonProperty("url") val url: String,
+    @JsonProperty("parentId") val parentId: String,
 )

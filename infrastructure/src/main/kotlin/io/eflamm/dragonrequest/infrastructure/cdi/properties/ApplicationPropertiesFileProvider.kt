@@ -4,13 +4,22 @@ import io.eflamm.dragonrequest.domain.monitoring.Logger
 import java.util.Properties
 import kotlin.reflect.KClass
 
-class ApplicationPropertiesFileProvider(propertiesFilePath: String, fallbackPropertiesFilePath: String, private val logger: Logger): PropertyProvider {
-
+class ApplicationPropertiesFileProvider(
+    propertiesFilePath: String,
+    fallbackPropertiesFilePath: String,
+    private val logger: Logger,
+) : PropertyProvider {
     private val properties: Properties = Properties()
 
-    enum class Property(val keyInPropertiesFile: String, val expectedType:  KClass<*>) {
+    enum class Property(
+        val keyInPropertiesFile: String,
+        val expectedType: KClass<*>,
+    ) {
+        MONGODB_DATABASE_NAME("database.mongodb.database", String::class),
+        MONGODB_COLLECTION_NAME("database.mongodb.collection", String::class),
+        MONGODB_ADDRESS("database.mongodb.address", String::class),
         SQLITE_FILE_PATH("database.sqlite.file-path", String::class),
-        HTTP_SERVER_PORT("http-server.port", Int::class)
+        HTTP_SERVER_PORT("http-server.port", Int::class),
     }
 
     init {
@@ -19,23 +28,25 @@ class ApplicationPropertiesFileProvider(propertiesFilePath: String, fallbackProp
         validateProperties()
     }
 
-    private fun get(key: String): String? {
-        return properties.getProperty(key)
-    }
+    private fun get(key: String): String? = properties.getProperty(key)
 
     private fun loadPropertiesFromFiles(filePaths: List<String>) {
-         filePaths.forEach{ filePath -> this::class.java.classLoader.getResourceAsStream(filePath).use { this.properties.load(it) }}
+        filePaths.forEach { filePath ->
+            this::class.java.classLoader
+                .getResourceAsStream(filePath)
+                .use { this.properties.load(it) }
+        }
     }
 
     private fun areThereMissingFiles(filePaths: List<String>) {
         var numberOfMissingFiles = 0
-        filePaths.forEach{ filePath ->
+        filePaths.forEach { filePath ->
             if (this::class.java.classLoader.getResource(filePath) == null) {
                 numberOfMissingFiles += 1
                 logger.warn("The property file $filePath is missing")
             }
         }
-        if(filePaths.size == numberOfMissingFiles) {
+        if (filePaths.size == numberOfMissingFiles) {
             logger.error("All the files are missing")
             throw RuntimeException()
         }
@@ -52,25 +63,28 @@ class ApplicationPropertiesFileProvider(propertiesFilePath: String, fallbackProp
                 errorMessages.add("Missing property ${property.keyInPropertiesFile}")
             }
         }
-        if(errorMessages.isNotEmpty()) {
+        if (errorMessages.isNotEmpty()) {
             logger.error("Error while loading properties", errorMessages)
             throw RuntimeException()
         }
     }
 
-    private fun validatePropertyType(propertyKey: String, propertyValue: String, expectedType:  KClass<*>): String? {
+    private fun validatePropertyType(
+        propertyKey: String,
+        propertyValue: String,
+        expectedType: KClass<*>,
+    ): String? {
         var errorMessage: String? = null
-        when(expectedType) {
+        when (expectedType) {
             String::class -> {
-                if(propertyValue.isBlank()) {
+                if (propertyValue.isBlank()) {
                     errorMessage = "The property $propertyKey is empty"
                 }
             }
             Int::class -> {
-                if(propertyValue.toIntOrNull() == null) {
+                if (propertyValue.toIntOrNull() == null) {
                     errorMessage = "The property $propertyKey has the value $propertyValue, which is not an integer"
                 }
-
             }
             else -> {
                 // cannot happen
@@ -79,13 +93,13 @@ class ApplicationPropertiesFileProvider(propertiesFilePath: String, fallbackProp
         return errorMessage
     }
 
-    override fun sqliteFilePath(): String {
-        // run validateProperties before using this function
-        return this.get("database.sqlite.file-path")!!
-    }
+    override fun mongodbDatabaseName(): String = this.get(Property.MONGODB_DATABASE_NAME.keyInPropertiesFile)!!
 
-    override fun httpServerPort(): Int {
-        // run validateProperties before using this function
-        return this.get("http-server.port")!!.toInt()
-    }
+    override fun mongodbCollectionName(): String = this.get(Property.MONGODB_COLLECTION_NAME.keyInPropertiesFile)!!
+
+    override fun mongodbAddress(): String = this.get(Property.MONGODB_ADDRESS.keyInPropertiesFile)!!
+
+    override fun sqliteFilePath(): String = this.get("database.sqlite.file-path")!!
+
+    override fun httpServerPort(): Int = this.get(Property.HTTP_SERVER_PORT.keyInPropertiesFile)!!.toInt()
 }

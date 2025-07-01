@@ -1,13 +1,20 @@
 package io.eflamm.dragonrequest.infrastructure.cdi
 
-import io.eflamm.dragonrequest.application.usecase.*
+import io.eflamm.dragonrequest.application.usecase.ApiFileUseCases
+import io.eflamm.dragonrequest.application.usecase.CollectionUseCases
+import io.eflamm.dragonrequest.application.usecase.EndpointUseCases
+import io.eflamm.dragonrequest.application.usecase.WorkspaceUseCases
 import io.eflamm.dragonrequest.domain.monitoring.Logger
+import io.eflamm.dragonrequest.domain.repository.ApiFilesRepository
+import io.eflamm.dragonrequest.domain.repository.CollectionRepository
 import io.eflamm.dragonrequest.domain.repository.EndpointRepository
+import io.eflamm.dragonrequest.domain.repository.WorkspaceRepository
 import io.eflamm.dragonrequest.infrastructure.api.EndpointsController
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.ApplicationPropertiesFileProvider
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.PropertyProvider
 import io.eflamm.dragonrequest.logger.slf4j.SLF4JLogger
-import io.eflamm.dragonrequest.repository.sqlite.SqliteRepository
+import io.eflamm.dragonrequest.repository.mongodb.MongoConnectorImpl
+import io.eflamm.dragonrequest.repository.mongodb.MongoRepository
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
@@ -15,8 +22,7 @@ fun main(args: Array<String>) {
 }
 
 class ApplicationDependencyInjector {
-
-    private lateinit var repository: EndpointRepository
+    private lateinit var repository: MongoRepository
     private lateinit var logger: Logger
 
     fun startApplication(startArguments: List<String>) {
@@ -39,7 +45,7 @@ class ApplicationDependencyInjector {
         var profile = "default"
         if (startupArguments.isNotEmpty()) {
             val profileAppArgument = startupArguments[0]
-            if(authorizedProfiles.contains(profileAppArgument)) {
+            if (authorizedProfiles.contains(profileAppArgument)) {
                 profile = profileAppArgument
             } else {
                 logger.warn("Unauthorized profile : $profileAppArgument")
@@ -49,64 +55,82 @@ class ApplicationDependencyInjector {
         return profile
     }
 
-    private fun getPropertyFileName(profile: String): String {
-        return when(profile) {
+    private fun getPropertyFileName(profile: String): String =
+        when (profile) {
             "dev" -> "application-dev.properties"
             "integration-testing" -> "application-integration-testing.properties"
             "default" -> "application.properties"
             else -> "application.properties"
         }
-    }
 
     private fun instantiateController(propertyProvider: PropertyProvider): EndpointsController {
         logInstantiation(EndpointsController::class.java.simpleName, "controller")
         return EndpointsController(
-            instantiateGetEndpointsUseCase(propertyProvider),
-            instantiateGetSingleEndpointUseCase(propertyProvider),
-            instantiateCreateEndpointUseCase(propertyProvider),
-            instantiateUpdateEndpointUseCase(propertyProvider),
-            instantiateDeleteEndpointUseCase(propertyProvider),
-            instantiateLogger(EndpointsController::class.java.simpleName)
+            instantiateApiFileUseCases(propertyProvider),
+            instantiateWorkspaceUseCases(propertyProvider),
+            instantiateCollectionUseCases(propertyProvider),
+            instantiateEndpointUseCases(propertyProvider),
+            instantiateLogger(EndpointsController::class.java.simpleName),
         )
     }
 
-    private fun instantiateGetEndpointsUseCase(propertyProvider: PropertyProvider): GetEndpointsUseCase {
-        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
-        return GetEndpointsUseCase(endpointRepository)
+    private fun instantiateApiFileUseCases(propertyProvider: PropertyProvider): ApiFileUseCases {
+        val repository = instantiateApiFileRepositoryImpl(propertyProvider)
+        return ApiFileUseCases(repository)
     }
 
-    private fun instantiateGetSingleEndpointUseCase(propertyProvider: PropertyProvider): GetSingleEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
-        return GetSingleEndpointUseCase(endpointRepository)
+    private fun instantiateWorkspaceUseCases(propertyProvider: PropertyProvider): WorkspaceUseCases {
+        val repository = instantiateWorkspaceRepositoryImpl(propertyProvider)
+        return WorkspaceUseCases(repository)
     }
 
-    private fun instantiateCreateEndpointUseCase(propertyProvider: PropertyProvider): CreateEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
-        return CreateEndpointUseCase(endpointRepository)
+    private fun instantiateCollectionUseCases(propertyProvider: PropertyProvider): CollectionUseCases {
+        val repository = instantiateCollectionRepositoryImpl(propertyProvider)
+        return CollectionUseCases(repository)
     }
 
-    private fun instantiateUpdateEndpointUseCase(propertyProvider: PropertyProvider): UpdateEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
-        return UpdateEndpointUseCase(endpointRepository)
+    private fun instantiateEndpointUseCases(propertyProvider: PropertyProvider): EndpointUseCases {
+        val repository = instantiateEndpointRepositoryImpl(propertyProvider)
+        return EndpointUseCases(repository)
     }
 
-    private fun instantiateDeleteEndpointUseCase(propertyProvider: PropertyProvider): DeleteEndpointUseCase {
-        val endpointRepository = instantiateRepositoryImpl(propertyProvider)
-        return DeleteEndpointUseCase(endpointRepository)
-    }
+    private fun instantiateApiFileRepositoryImpl(propertyProvider: PropertyProvider): ApiFilesRepository = instantiateMongoRepository(propertyProvider)
 
-    private fun instantiateRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository {
+    private fun instantiateWorkspaceRepositoryImpl(propertyProvider: PropertyProvider): WorkspaceRepository = instantiateMongoRepository(propertyProvider)
+
+    private fun instantiateCollectionRepositoryImpl(propertyProvider: PropertyProvider): CollectionRepository = instantiateMongoRepository(propertyProvider)
+
+    private fun instantiateEndpointRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository = instantiateMongoRepository(propertyProvider)
+
+    private fun instantiateMongoRepository(propertyProvider: PropertyProvider): MongoRepository {
         if (!this::repository.isInitialized) {
-            repository = SqliteRepository(propertyProvider.sqliteFilePath(), instantiateLogger(SqliteRepository::class.java.simpleName))
-            (repository as SqliteRepository).connect()
-            logInstantiation(SqliteRepository::class.java.simpleName, "EndpointRepository")
+            repository =
+                MongoRepository(
+                    MongoConnectorImpl(
+                        propertyProvider.mongodbAddress(),
+                        propertyProvider.mongodbDatabaseName(),
+                        propertyProvider.mongodbCollectionName(),
+                        instantiateLogger(MongoConnectorImpl::class.java.simpleName),
+                    ),
+                    instantiateLogger(MongoRepository::class.java.simpleName),
+                )
+            (repository).connect()
+            logInstantiation(MongoRepository::class.java.simpleName, "EndpointRepository")
         }
         return repository
     }
 
-    private fun instantiatePropertyProviderImpl(propertiesFileName: String, fallbackPropertiesFileName: String): PropertyProvider {
+    private fun instantiatePropertyProviderImpl(
+        propertiesFileName: String,
+        fallbackPropertiesFileName: String,
+    ): PropertyProvider {
         logInstantiation(ApplicationPropertiesFileProvider::class.java.simpleName, "PropertyProvider")
-        val provider = ApplicationPropertiesFileProvider(propertiesFileName, fallbackPropertiesFileName, instantiateLogger(ApplicationPropertiesFileProvider::class.java.simpleName))
+        val provider =
+            ApplicationPropertiesFileProvider(
+                propertiesFileName,
+                fallbackPropertiesFileName,
+                instantiateLogger(ApplicationPropertiesFileProvider::class.java.simpleName),
+            )
         return provider
     }
 
@@ -116,12 +140,16 @@ class ApplicationDependencyInjector {
         return logger
     }
 
-    private fun logInstantiation(className: String, asInterfaceName: String) {
+    private fun logInstantiation(
+        className: String,
+        asInterfaceName: String,
+    ) {
         logger.info("instantiate $className as $asInterfaceName")
     }
 
     private fun printOutAppName() {
-        println("""   
+        println(
+            """   
                              ██████████                                                           
                             ░░███░░░░███                                                     
                              ░███   ░░███ ████████   ██████    ███████  ██████  ████████     
@@ -139,6 +167,7 @@ class ApplicationDependencyInjector {
                         ░███     ░███░░░  ░░███ ░░████  ░███ ░███ ░███░░░   ░░░░███  ░███ ███
                         █████    ░░██████  ░░░██████░██ ░░████████░░██████  ██████   ░░█████ 
                        ░░░░░      ░░░░░░     ░░░░░░ ░░   ░░░░░░░░  ░░░░░░  ░░░░░░     ░░░░░ 
-        """)
+        """,
+        )
     }
 }

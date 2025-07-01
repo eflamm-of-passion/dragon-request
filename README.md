@@ -19,11 +19,14 @@ To list all the modules that are loaded :
 ./gradlew -q projects
 ```
 
-## TODO
+## ROADMAP
 - display logs when 500
 - fix docker
 - add swagger
 - add hypermedia links
+
+## TODO
+- save in the database
 
 ## Architecture
 

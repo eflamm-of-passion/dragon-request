@@ -12,7 +12,7 @@ plugins {
 rootProject.name = "dragon-request"
 include("domain")
 include("application")
-include("repository-sqlite")
+include("repository-mongodb")
 include("logger-slf4j")
 include("infrastructure")
-//include("ui") // FIXME gradle depencencies between root and submodules
+// include("ui") // FIXME gradle depencencies between root and submodules

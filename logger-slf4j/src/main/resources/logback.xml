@@ -15,4 +15,9 @@
     <logger name="io.vertx" level="ERROR" />
     <logger name="io.netty" level="ERROR" />
     <logger name="io.eflamm.dragonrequest" level="DEBUG" />
+
+    <!-- Set MongoDB logging to OFF -->
+    <logger name="org.mongodb" level="OFF"/>
+    <logger name="com.mongodb" level="OFF"/>
+    <logger name="org.mongodb.driver" level="OFF"/>
 </configuration>

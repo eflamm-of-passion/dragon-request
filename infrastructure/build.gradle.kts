@@ -13,7 +13,7 @@ repositories {
 dependencies {
     implementation(project(":domain"))
     implementation(project(":application"))
-    implementation(project(":repository-sqlite"))
+    implementation(project(":repository-mongodb"))
     implementation(project(":logger-slf4j"))
 
     implementation(libs.jackson.module)
