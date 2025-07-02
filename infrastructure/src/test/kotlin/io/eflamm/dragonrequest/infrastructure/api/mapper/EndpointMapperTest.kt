@@ -9,7 +9,7 @@ import io.eflamm.dragonrequest.domain.model.endpoint.Path
 import io.eflamm.dragonrequest.domain.model.endpoint.Port
 import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
 import io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters
-import io.eflamm.dragonrequest.infrastructure.api.EndpointCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 

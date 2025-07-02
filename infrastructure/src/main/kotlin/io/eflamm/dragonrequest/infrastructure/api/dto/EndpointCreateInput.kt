@@ -1,10 +1,11 @@
-package io.eflamm.dragonrequest.infrastructure.api
+package io.eflamm.dragonrequest.infrastructure.api.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
-data class EndpointOutput(
-    @JsonProperty("id") val id: String,
+// TODO enable one string constructor
+data class EndpointCreateInput(
     @JsonProperty("name") val name: String,
     @JsonProperty("httpMethod") val httpMethod: String,
     @JsonProperty("url") val url: String,
-) : ApiFileOutput
+    @JsonProperty("parentId") val parentId: String,
+)

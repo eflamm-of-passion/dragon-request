@@ -1,14 +1,8 @@
 package io.eflamm.dragonrequest.infrastructure.cdi
 
 import io.eflamm.dragonrequest.application.usecase.ApiFileUseCases
-import io.eflamm.dragonrequest.application.usecase.CollectionUseCases
-import io.eflamm.dragonrequest.application.usecase.EndpointUseCases
-import io.eflamm.dragonrequest.application.usecase.WorkspaceUseCases
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.ApiFilesRepository
-import io.eflamm.dragonrequest.domain.repository.CollectionRepository
-import io.eflamm.dragonrequest.domain.repository.EndpointRepository
-import io.eflamm.dragonrequest.domain.repository.WorkspaceRepository
 import io.eflamm.dragonrequest.infrastructure.api.EndpointsController
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.ApplicationPropertiesFileProvider
 import io.eflamm.dragonrequest.infrastructure.cdi.properties.PropertyProvider
@@ -67,9 +61,6 @@ class ApplicationDependencyInjector {
         logInstantiation(EndpointsController::class.java.simpleName, "controller")
         return EndpointsController(
             instantiateApiFileUseCases(propertyProvider),
-            instantiateWorkspaceUseCases(propertyProvider),
-            instantiateCollectionUseCases(propertyProvider),
-            instantiateEndpointUseCases(propertyProvider),
             instantiateLogger(EndpointsController::class.java.simpleName),
         )
     }
@@ -79,28 +70,7 @@ class ApplicationDependencyInjector {
         return ApiFileUseCases(repository)
     }
 
-    private fun instantiateWorkspaceUseCases(propertyProvider: PropertyProvider): WorkspaceUseCases {
-        val repository = instantiateWorkspaceRepositoryImpl(propertyProvider)
-        return WorkspaceUseCases(repository)
-    }
-
-    private fun instantiateCollectionUseCases(propertyProvider: PropertyProvider): CollectionUseCases {
-        val repository = instantiateCollectionRepositoryImpl(propertyProvider)
-        return CollectionUseCases(repository)
-    }
-
-    private fun instantiateEndpointUseCases(propertyProvider: PropertyProvider): EndpointUseCases {
-        val repository = instantiateEndpointRepositoryImpl(propertyProvider)
-        return EndpointUseCases(repository)
-    }
-
     private fun instantiateApiFileRepositoryImpl(propertyProvider: PropertyProvider): ApiFilesRepository = instantiateMongoRepository(propertyProvider)
-
-    private fun instantiateWorkspaceRepositoryImpl(propertyProvider: PropertyProvider): WorkspaceRepository = instantiateMongoRepository(propertyProvider)
-
-    private fun instantiateCollectionRepositoryImpl(propertyProvider: PropertyProvider): CollectionRepository = instantiateMongoRepository(propertyProvider)
-
-    private fun instantiateEndpointRepositoryImpl(propertyProvider: PropertyProvider): EndpointRepository = instantiateMongoRepository(propertyProvider)
 
     private fun instantiateMongoRepository(propertyProvider: PropertyProvider): MongoRepository {
         if (!this::repository.isInitialized) {

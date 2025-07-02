@@ -1,24 +1,19 @@
 package io.eflamm.dragonrequest.infrastructure.api
 
 import io.eflamm.dragonrequest.application.usecase.ApiFileUseCases
-import io.eflamm.dragonrequest.application.usecase.CollectionUseCases
-import io.eflamm.dragonrequest.application.usecase.EndpointUseCases
-import io.eflamm.dragonrequest.application.usecase.WorkspaceUseCases
 import io.eflamm.dragonrequest.domain.exception.DragonRequestAppException
 import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.ApiFile
-import io.eflamm.dragonrequest.domain.model.Collection
-import io.eflamm.dragonrequest.domain.model.Endpoint
-import io.eflamm.dragonrequest.domain.model.Workspace
 import io.eflamm.dragonrequest.domain.model.common.Id
 import io.eflamm.dragonrequest.domain.monitoring.Logger
+import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.WorkspaceCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.mapper.LoggerUtils
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toCollection
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toDto
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toEndpoint
-import io.eflamm.dragonrequest.infrastructure.api.mapper.toEndpointOutput
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toWorkspace
-import io.eflamm.dragonrequest.infrastructure.api.mapper.toWorkspaceOutput
 import io.netty.handler.codec.http.HttpResponseStatus
 import io.vertx.core.Vertx
 import io.vertx.core.http.HttpHeaders
@@ -35,9 +30,6 @@ import java.net.URI
 
 class EndpointsController(
     private val apiFileUseCases: ApiFileUseCases,
-    private val workspaceUseCases: WorkspaceUseCases,
-    private val collectionUseCases: CollectionUseCases,
-    private val endpointUseCases: EndpointUseCases,
     private val logger: Logger,
 ) {
     object Constants {
@@ -139,12 +131,12 @@ class EndpointsController(
     }
 
     private fun getApiFiles(context: RoutingContext) {
-        logger.info("request GET ${Constants.API_FILES_BASE_PATH}")
+        logger.info("request ${HttpMethod.GET} ${Constants.API_FILES_BASE_PATH}")
         val getApiFilesResult = apiFileUseCases.getApiFiles()
         if (getApiFilesResult.isSuccess) {
             handleSuccessGetApiFiles(context, getApiFilesResult)
         } else {
-            handleFailureGetApiFiles(context, getApiFilesResult.exceptionOrNull() as DragonRequestAppException)
+            handleFailure(context, HttpMethod.GET, Constants.API_FILES_BASE_PATH, getApiFilesResult.exceptionOrNull() as DragonRequestAppException)
         }
     }
 
@@ -158,28 +150,6 @@ class EndpointsController(
             .response()
             .setStatusCode(HttpResponseStatus.OK.code())
             .end(Json.encode(apiFiles.toDto()))
-    }
-
-    private fun handleFailureGetApiFiles(
-        context: RoutingContext,
-        e: DragonRequestAppException,
-    ) = when (e.type) {
-        ErrorType.TECHNICAL_ERROR -> {
-            logger.warn("response GET ${Constants.API_FILES_BASE_PATH} - 500 server error")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end(Json.encode("error" to e.message))
-        }
-
-        else -> {
-            logger.warn("response GET ${Constants.API_FILES_BASE_PATH} - 500 server error")
-            logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end()
-        }
     }
 
 //    private fun getEndpoint(context: RoutingContext) {
@@ -207,7 +177,7 @@ class EndpointsController(
 //    }
 
     private fun createEndpoint(context: RoutingContext) {
-        logger.info("request POST ${Constants.ENDPOINTS_BASE_PATH}")
+        logger.info("request ${HttpMethod.POST} ${Constants.ENDPOINTS_BASE_PATH}")
         val requestBody: JsonObject = context.body().asJsonObject()
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
@@ -217,62 +187,18 @@ class EndpointsController(
         val validationErrorMessages = EndpointsValidator.validate(endpointInput)
         val createEndpointResult =
             if (EndpointsValidator.doesNotContainErrors(validationErrorMessages)) {
-                endpointUseCases.create(endpointInput.toEndpoint(), Id.fromString(endpointInput.parentId))
+                apiFileUseCases.create(endpointInput.toEndpoint(), Id.fromString(endpointInput.parentId))
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
             }
 
         if (createEndpointResult.isSuccess) {
-            handleSuccessCreateEndpoint(context, createEndpointResult)
+            handleSuccessCreate(context, Constants.ENDPOINTS_BASE_PATH, createEndpointResult)
         } else {
-            handleFailureCreateEndpoint(context, createEndpointResult.exceptionOrNull() as DragonRequestAppException)
+            handleFailure(context, HttpMethod.POST, Constants.ENDPOINTS_BASE_PATH, createEndpointResult.exceptionOrNull() as DragonRequestAppException)
         }
     }
 
-    private fun handleSuccessCreateEndpoint(
-        context: RoutingContext,
-        createEndpointResult: Result<Endpoint>,
-    ) {
-        val createdEndpoint = createEndpointResult.getOrNull()!!
-        logger.info("response POST ${Constants.ENDPOINTS_BASE_PATH} - 201 created")
-        logger.debug(LoggerUtils.displayAsJson(createdEndpoint))
-        val locationUri = URI.create("${Constants.ENDPOINTS_BASE_PATH}/${createdEndpoint.id}").toString()
-        context
-            .response()
-            .setStatusCode(HttpResponseStatus.CREATED.code())
-            .putHeader("Location", locationUri)
-            .end(Json.encode(createdEndpoint.toEndpointOutput()))
-    }
-
-    private fun handleFailureCreateEndpoint(
-        context: RoutingContext,
-        e: DragonRequestAppException,
-    ) = when (e.type) {
-        ErrorType.INVALID_INPUT -> {
-            logger.info("response POST ${Constants.ENDPOINTS_BASE_PATH} - 400 bad request")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
-                .end(Json.encode("error" to e.message))
-        }
-
-        ErrorType.TECHNICAL_ERROR -> {
-            logger.warn("response POST ${Constants.ENDPOINTS_BASE_PATH} - 500 server error")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end(Json.encode("error" to e.message))
-        }
-
-        else -> {
-            logger.warn("response POST ${Constants.ENDPOINTS_BASE_PATH} - 500 server error")
-            logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end()
-        }
-    }
 //
 //    private fun updateEndpoint(context: RoutingContext) {
 //        val endpointId = context.pathParam("id")
@@ -316,33 +242,6 @@ class EndpointsController(
 //            .end(Json.encode(ApiFilesMapper.businessToDto(updatedEndpoint)))
 //    }
 
-    private fun handleFailureUpdateEndpoint(
-        context: RoutingContext,
-        id: String,
-        e: DragonRequestAppException,
-    ) = when (e.type) {
-        ErrorType.ENTITY_NOT_FOUND -> {
-            logger.info("response PUT ${Constants.ENDPOINTS_BASE_PATH}/$id - 404 not found")
-            context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end()
-        }
-
-        ErrorType.INVALID_INPUT -> {
-            logger.info("response PUT ${Constants.ENDPOINTS_BASE_PATH}/$id - 400 bad request")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
-                .end(Json.encode("error" to e.message))
-        }
-
-        ErrorType.TECHNICAL_ERROR -> {
-            logger.warn("response PUT ${Constants.ENDPOINTS_BASE_PATH}/$id - 500 server error")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end(Json.encode("error" to e.message))
-        }
-    }
-
 //    private fun deleteEndpoint(context: RoutingContext) {
 //        val endpointId = context.pathParam("id")
 //        logger.info("request DELETE ${Constants.ENDPOINT_BASE_PATH}/$endpointId")
@@ -369,33 +268,9 @@ class EndpointsController(
 //            .end()
 //    }
 //
-//    private fun handleFailureGetOrDeleteEndpoint(
-//        context: RoutingContext,
-//        id: String,
-//        e: DragonRequestAppException,
-//    ) = when (e.type) {
-//        ErrorType.ENTITY_NOT_FOUND -> {
-//            logger.info("response DELETE ${Constants.ENDPOINT_BASE_PATH}/$id - 404 not found")
-//            context.response().setStatusCode(HttpResponseStatus.NOT_FOUND.code()).end()
-//        }
-//
-//        ErrorType.TECHNICAL_ERROR -> {
-//            logger.warn("response DELETE ${Constants.ENDPOINT_BASE_PATH}/$id - 500 server error")
-//            context
-//                .response()
-//                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-//                .end(Json.encode("error" to e.message))
-//        }
-//
-//        else -> {
-//            logger.warn("response DELETE ${Constants.ENDPOINT_BASE_PATH}/$id - 500 server error")
-//            logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
-//            context.response().setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code()).end()
-//        }
-//    }
 
     private fun createCollection(context: RoutingContext) {
-        logger.info("request POST ${Constants.COLLECTIONS_BASE_PATH}")
+        logger.info("request ${HttpMethod.POST} ${Constants.COLLECTIONS_BASE_PATH}")
         val requestBody: JsonObject = context.body().asJsonObject()
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
@@ -405,64 +280,19 @@ class EndpointsController(
         val validationErrorMessages = CollectionsValidator.validate(collectionInput)
         val createCollectionResult =
             if (CollectionsValidator.doesNotContainErrors(validationErrorMessages)) {
-                collectionUseCases.create(collectionInput.toCollection(), Id.fromString(collectionInput.parentId))
+                apiFileUseCases.create(collectionInput.toCollection(), Id.fromString(collectionInput.parentId))
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
             }
         if (createCollectionResult.isSuccess) {
-            handleSuccessCreateCollection(context, createCollectionResult)
+            handleSuccessCreate(context, Constants.COLLECTIONS_BASE_PATH, createCollectionResult)
         } else {
-            handleFailureCreateCollection(context, createCollectionResult.exceptionOrNull() as DragonRequestAppException)
-        }
-    }
-
-    private fun handleSuccessCreateCollection(
-        context: RoutingContext,
-        createResult: Result<Collection>,
-    ) {
-        val createdCollection = createResult.getOrNull()!!
-        logger.info("response POST ${Constants.COLLECTIONS_BASE_PATH} - 201 created")
-        logger.debug(LoggerUtils.displayAsJson(createdCollection))
-        val locationUri = URI.create("${Constants.COLLECTIONS_BASE_PATH}/${createdCollection.id}").toString()
-        context
-            .response()
-            .setStatusCode(HttpResponseStatus.CREATED.code())
-            .putHeader("Location", locationUri)
-            .end(Json.encode(createdCollection.toDto()))
-    }
-
-    private fun handleFailureCreateCollection(
-        context: RoutingContext,
-        e: DragonRequestAppException,
-    ) = when (e.type) {
-        ErrorType.INVALID_INPUT -> {
-            logger.info("response POST ${Constants.COLLECTIONS_BASE_PATH} - 400 bad request")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
-                .end(Json.encode(JsonObject().put("error", e.message)))
-        }
-
-        ErrorType.TECHNICAL_ERROR -> {
-            logger.warn("response POST ${Constants.WORKSPACES_BASE_PATH} - 500 server error")
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end(Json.encode(JsonObject().put("error", e.message)))
-        }
-
-        else -> {
-            logger.warn("response POST ${Constants.WORKSPACES_BASE_PATH} - 500 server error")
-            logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
-            context
-                .response()
-                .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
-                .end()
+            handleFailure(context, HttpMethod.POST, Constants.COLLECTIONS_BASE_PATH, createCollectionResult.exceptionOrNull() as DragonRequestAppException)
         }
     }
 
     private fun createWorkspace(context: RoutingContext) {
-        logger.info("request POST ${Constants.WORKSPACES_BASE_PATH}")
+        logger.info("request ${HttpMethod.POST} ${Constants.WORKSPACES_BASE_PATH}")
         val requestBody: JsonObject = context.body().asJsonObject()
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
@@ -472,38 +302,41 @@ class EndpointsController(
         val validationErrorMessages = WorkspacesValidator.validate(workspaceInput)
         val createWorkspaceResult =
             if (WorkspacesValidator.doesNotContainErrors(validationErrorMessages)) {
-                workspaceUseCases.create(workspaceInput.toWorkspace())
+                apiFileUseCases.create(workspaceInput.toWorkspace())
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
             }
         if (createWorkspaceResult.isSuccess) {
-            handleSuccessCreateWorkspace(context, createWorkspaceResult)
+            handleSuccessCreate(context, Constants.WORKSPACES_BASE_PATH, createWorkspaceResult)
         } else {
-            handleFailureCreateWorkspace(context, createWorkspaceResult.exceptionOrNull() as DragonRequestAppException)
+            handleFailure(context, HttpMethod.POST, Constants.WORKSPACES_BASE_PATH, createWorkspaceResult.exceptionOrNull() as DragonRequestAppException)
         }
     }
 
-    private fun handleSuccessCreateWorkspace(
+    private fun handleSuccessCreate(
         context: RoutingContext,
-        createResult: Result<Workspace>,
+        resourceBasePath: String,
+        createEndpointResult: Result<ApiFile>,
     ) {
-        val createdWorkspace = createResult.getOrNull()!!
-        logger.info("response POST ${Constants.WORKSPACES_BASE_PATH} - 201 created")
-        logger.debug(LoggerUtils.displayAsJson(createdWorkspace))
-        val locationUri = URI.create("${Constants.WORKSPACES_BASE_PATH}/${createdWorkspace.id}").toString()
+        val createdApiFile = createEndpointResult.getOrNull()!!
+        logger.info("response POST $resourceBasePath - 201 created")
+        logger.debug(LoggerUtils.displayAsJson(createdApiFile))
+        val locationUri = URI.create("$resourceBasePath/${createdApiFile.id}").toString()
         context
             .response()
             .setStatusCode(HttpResponseStatus.CREATED.code())
             .putHeader("Location", locationUri)
-            .end(Json.encode(createdWorkspace.toWorkspaceOutput()))
+            .end(Json.encode(createdApiFile.toDto()))
     }
 
-    private fun handleFailureCreateWorkspace(
+    private fun handleFailure(
         context: RoutingContext,
+        httpMethod: HttpMethod,
+        resourceBasePath: String,
         e: DragonRequestAppException,
     ) = when (e.type) {
         ErrorType.INVALID_INPUT -> {
-            logger.info("response POST ${Constants.WORKSPACES_BASE_PATH} - 400 bad request")
+            logger.info("response $httpMethod $resourceBasePath - 400 bad request")
             context
                 .response()
                 .setStatusCode(HttpResponseStatus.BAD_REQUEST.code())
@@ -511,7 +344,7 @@ class EndpointsController(
         }
 
         ErrorType.TECHNICAL_ERROR -> {
-            logger.warn("response POST ${Constants.WORKSPACES_BASE_PATH} - 500 server error")
+            logger.warn("response $httpMethod $resourceBasePath - 500 server error")
             context
                 .response()
                 .setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code())
@@ -519,7 +352,7 @@ class EndpointsController(
         }
 
         else -> {
-            logger.warn("response POST ${Constants.WORKSPACES_BASE_PATH} - 500 server error")
+            logger.warn("response $httpMethod $resourceBasePath - 500 server error")
             logger.error(Constants.DEFAULT_FAILURE_MESSAGE)
             context
                 .response()

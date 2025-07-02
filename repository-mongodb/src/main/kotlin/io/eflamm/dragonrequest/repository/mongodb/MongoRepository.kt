@@ -17,18 +17,12 @@ import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
 import io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters
 import io.eflamm.dragonrequest.domain.monitoring.Logger
 import io.eflamm.dragonrequest.domain.repository.ApiFilesRepository
-import io.eflamm.dragonrequest.domain.repository.CollectionRepository
-import io.eflamm.dragonrequest.domain.repository.EndpointRepository
-import io.eflamm.dragonrequest.domain.repository.WorkspaceRepository
 import org.bson.Document
 
 class MongoRepository(
     private val mongoConnector: MongoConnector,
     private val logger: Logger,
-) : ApiFilesRepository,
-    WorkspaceRepository,
-    CollectionRepository,
-    EndpointRepository {
+) : ApiFilesRepository {
     override fun getAllApiFiles(): Result<List<ApiFile>> {
         val documents = mongoConnector.find()
         val mapOfApiFilesById: Map<String, ApiFile> = documents.map { it.toApiFile() }.associateBy { it.id.toString() }

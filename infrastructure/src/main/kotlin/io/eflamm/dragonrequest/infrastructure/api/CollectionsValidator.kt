@@ -1,5 +1,7 @@
 package io.eflamm.dragonrequest.infrastructure.api
 
+import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionUpdateInput
 import java.util.stream.Collectors
 
 // TODO should unit test

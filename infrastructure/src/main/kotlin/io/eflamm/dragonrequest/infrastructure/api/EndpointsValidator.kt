@@ -1,5 +1,7 @@
 package io.eflamm.dragonrequest.infrastructure.api
 
+import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointUpdateInput
 import java.net.MalformedURLException
 import java.net.URI
 import java.net.URISyntaxException

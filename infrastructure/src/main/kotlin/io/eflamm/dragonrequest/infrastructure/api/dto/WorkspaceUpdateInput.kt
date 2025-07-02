@@ -1,4 +1,4 @@
-package io.eflamm.dragonrequest.infrastructure.api
+package io.eflamm.dragonrequest.infrastructure.api.dto
 
 import com.fasterxml.jackson.annotation.JsonProperty
 
