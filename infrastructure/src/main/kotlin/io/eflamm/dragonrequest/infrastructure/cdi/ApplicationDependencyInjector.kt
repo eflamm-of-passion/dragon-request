@@ -70,6 +70,8 @@ class ApplicationDependencyInjector {
         return ApiFileUseCases(repository)
     }
 
+    // TODO according to the profile, I should use either one or another database
+    // TODO for integration testing I should use a fake mongo database, maybe it could be done with the MongoConnector
     private fun instantiateApiFileRepositoryImpl(propertyProvider: PropertyProvider): ApiFilesRepository = instantiateMongoRepository(propertyProvider)
 
     private fun instantiateMongoRepository(propertyProvider: PropertyProvider): MongoRepository {

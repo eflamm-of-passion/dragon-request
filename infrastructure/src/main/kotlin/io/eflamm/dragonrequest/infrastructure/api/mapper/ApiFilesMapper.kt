@@ -12,12 +12,10 @@ import io.eflamm.dragonrequest.domain.model.endpoint.Path
 import io.eflamm.dragonrequest.domain.model.endpoint.Port
 import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
 import io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters
+import io.eflamm.dragonrequest.infrastructure.api.dto.ApiFileCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.dto.ApiFileOutput
-import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionOutput
-import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointOutput
-import io.eflamm.dragonrequest.infrastructure.api.dto.WorkspaceCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.dto.WorkspaceOutput
 import java.net.URI
 
@@ -31,7 +29,7 @@ fun ApiFile.toDto(): ApiFileOutput =
 
 fun List<ApiFile>.toDto(): List<ApiFileOutput> = map { it.toDto() }
 
-fun WorkspaceCreateInput.toWorkspace(): Workspace = Workspace(Id.create(), ApiFilename(name))
+fun ApiFileCreateInput.Workspace.toWorkspace(): Workspace = Workspace(Id.create(), ApiFilename(name))
 
 fun Workspace.toWorkspaceOutput(): WorkspaceOutput =
     WorkspaceOutput(
@@ -40,7 +38,7 @@ fun Workspace.toWorkspaceOutput(): WorkspaceOutput =
         files = getFiles().map { it.toDto() },
     )
 
-fun CollectionCreateInput.toCollection(): Collection = Collection(Id.create(), ApiFilename(name))
+fun ApiFileCreateInput.Collection.toCollection(): Collection = Collection(Id.create(), ApiFilename(name))
 
 fun Collection.toCollectionOutput(): CollectionOutput =
     CollectionOutput(
@@ -49,7 +47,7 @@ fun Collection.toCollectionOutput(): CollectionOutput =
         files = getFiles().map { it.toDto() },
     )
 
-fun EndpointCreateInput.toEndpoint(): Endpoint {
+fun ApiFileCreateInput.Endpoint.toEndpoint(): Endpoint {
     val uri = URI(url)
     return Endpoint(
         Id.create(),

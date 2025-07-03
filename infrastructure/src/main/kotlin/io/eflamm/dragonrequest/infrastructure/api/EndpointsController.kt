@@ -6,9 +6,7 @@ import io.eflamm.dragonrequest.domain.exception.ErrorType
 import io.eflamm.dragonrequest.domain.model.ApiFile
 import io.eflamm.dragonrequest.domain.model.common.Id
 import io.eflamm.dragonrequest.domain.monitoring.Logger
-import io.eflamm.dragonrequest.infrastructure.api.dto.CollectionCreateInput
-import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
-import io.eflamm.dragonrequest.infrastructure.api.dto.WorkspaceCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.ApiFileCreateInput
 import io.eflamm.dragonrequest.infrastructure.api.mapper.LoggerUtils
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toCollection
 import io.eflamm.dragonrequest.infrastructure.api.mapper.toDto
@@ -182,11 +180,11 @@ class EndpointsController(
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
         // TODO handle the IllegalArgumentException if body input is not valid
-        val endpointInput: EndpointCreateInput = requestBody.mapTo(EndpointCreateInput::class.java)
+        val endpointInput: ApiFileCreateInput.Endpoint = requestBody.mapTo(ApiFileCreateInput.Endpoint::class.java)
 
-        val validationErrorMessages = EndpointsValidator.validate(endpointInput)
+        val validationErrorMessages = endpointInput.validate()
         val createEndpointResult =
-            if (EndpointsValidator.doesNotContainErrors(validationErrorMessages)) {
+            if (doesNotContainErrors(validationErrorMessages)) {
                 apiFileUseCases.create(endpointInput.toEndpoint(), Id.fromString(endpointInput.parentId))
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
@@ -275,11 +273,11 @@ class EndpointsController(
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
         // TODO handle the IllegalArgumentException if body input is not valid
-        val collectionInput: CollectionCreateInput = requestBody.mapTo(CollectionCreateInput::class.java)
+        val collectionInput: ApiFileCreateInput.Collection = requestBody.mapTo(ApiFileCreateInput.Collection::class.java)
 
-        val validationErrorMessages = CollectionsValidator.validate(collectionInput)
+        val validationErrorMessages = collectionInput.validate()
         val createCollectionResult =
-            if (CollectionsValidator.doesNotContainErrors(validationErrorMessages)) {
+            if (doesNotContainErrors(validationErrorMessages)) {
                 apiFileUseCases.create(collectionInput.toCollection(), Id.fromString(collectionInput.parentId))
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
@@ -297,19 +295,31 @@ class EndpointsController(
         logger.debug(LoggerUtils.displayAsJson(requestBody.toString()))
 
         // TODO handle the IllegalArgumentException if body input is not valid
-        val workspaceInput: WorkspaceCreateInput = requestBody.mapTo(WorkspaceCreateInput::class.java)
+        val workspaceInput: ApiFileCreateInput.Workspace = requestBody.mapTo(ApiFileCreateInput.Workspace::class.java)
 
-        val validationErrorMessages = WorkspacesValidator.validate(workspaceInput)
+        val validationErrorMessages = workspaceInput.validate()
         val createWorkspaceResult =
-            if (WorkspacesValidator.doesNotContainErrors(validationErrorMessages)) {
+            if (doesNotContainErrors(validationErrorMessages)) {
                 apiFileUseCases.create(workspaceInput.toWorkspace())
             } else {
                 Result.failure(DragonRequestAppException(ErrorType.INVALID_INPUT, validationErrorMessages))
             }
-        if (createWorkspaceResult.isSuccess) {
-            handleSuccessCreate(context, Constants.WORKSPACES_BASE_PATH, createWorkspaceResult)
+        handleResponse(createWorkspaceResult, context)
+    }
+
+    private fun <T : ApiFile> handleResponse(
+        creationResult: Result<T>,
+        context: RoutingContext,
+    ) {
+        if (creationResult.isSuccess) {
+            handleSuccessCreate(context, Constants.WORKSPACES_BASE_PATH, creationResult)
         } else {
-            handleFailure(context, HttpMethod.POST, Constants.WORKSPACES_BASE_PATH, createWorkspaceResult.exceptionOrNull() as DragonRequestAppException)
+            handleFailure(
+                context,
+                HttpMethod.POST,
+                Constants.WORKSPACES_BASE_PATH,
+                creationResult.exceptionOrNull() as DragonRequestAppException,
+            )
         }
     }
 

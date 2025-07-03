@@ -1,12 +1,16 @@
 package io.eflamm.dragonrequest.infrastructure.cdi
 
+import io.restassured.RestAssured
+import org.hamcrest.Matchers.equalTo
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
+import org.junit.jupiter.api.Test
 import java.io.File
+import java.util.UUID
 
 class ApplicationDependencyInjectorIntegrationTest {
     companion object {
-        const val ENDPOINTS_BASE_URL = "/endpoints/"
+        const val ENDPOINTS_BASE_URL = "/api-files/endpoints/"
 
         @JvmStatic
         @BeforeAll
@@ -22,28 +26,29 @@ class ApplicationDependencyInjectorIntegrationTest {
         }
     }
 
-//    @Test
-//    fun `GIVEN a url WHEN post THEN return 201 with the created endpoint`() {
-//        val body = """
-//            {
-//                "name": "someEndpoint",
-//                "httpMethod": "GET",
-//                "url": "http://acme.org/path?param=foo"
-//            }
-//        """
-//
-//        RestAssured
-//            .given()
-//            .header("Content-Type", "application/json")
-//            .body(body)
-//            .post(ENDPOINTS_BASE_URL)
-//            .then()
-//            .statusCode(201)
-//            .body("url", equalTo("http://acme.org/path?param=foo"))
-//            .extract()
-//            .response()
-//    }
-//
+    @Test
+    fun `GIVEN a url WHEN post THEN return 201 with the created endpoint`() {
+        val body = """
+            {
+                "parentId": "${UUID.randomUUID()}",
+                "name": "someEndpoint",
+                "httpMethod": "GET",
+                "url": "http://acme.org/path?param=foo"
+            }
+        """
+
+        RestAssured
+            .given()
+            .header("Content-Type", "application/json")
+            .body(body)
+            .post(ENDPOINTS_BASE_URL)
+            .then()
+            .statusCode(201)
+            .body("url", equalTo("http://acme.org/path?param=foo"))
+            .extract()
+            .response()
+    }
+
 //    @Test
 //    fun `GIVEN a malformed url WHEN post THEN return 400 with error message`() {
 //        val body = """

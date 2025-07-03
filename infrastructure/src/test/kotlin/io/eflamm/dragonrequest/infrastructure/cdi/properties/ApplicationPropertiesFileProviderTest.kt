@@ -24,6 +24,7 @@ class ApplicationPropertiesFileProviderTest {
         // when
         val actualSqlitePropertyValue = provider.sqliteFilePath()
         val actualHttpPortPropertyValue = provider.httpServerPort()
+        // TODO check the other properties
 
         // then
         assertThat(actualSqlitePropertyValue).isEqualTo(expectedSqlitePropertyValue)

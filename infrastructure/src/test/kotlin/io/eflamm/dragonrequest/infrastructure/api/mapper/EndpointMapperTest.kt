@@ -9,7 +9,7 @@ import io.eflamm.dragonrequest.domain.model.endpoint.Path
 import io.eflamm.dragonrequest.domain.model.endpoint.Port
 import io.eflamm.dragonrequest.domain.model.endpoint.Protocol
 import io.eflamm.dragonrequest.domain.model.endpoint.QueryParameters
-import io.eflamm.dragonrequest.infrastructure.api.dto.EndpointCreateInput
+import io.eflamm.dragonrequest.infrastructure.api.dto.ApiFileCreateInput
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -17,7 +17,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a http url with path, params and without port WHEN mapping THEN all values are set`() {
         // given
-        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "http://acme.org/path?param=foo&more=bar", "parentId")
+        val endpointCreateInput = ApiFileCreateInput.Endpoint("someEndpoint", "GET", "http://acme.org/path?param=foo&more=bar", "parentId")
 
         // when
         val endpoint = endpointCreateInput.toEndpoint()
@@ -33,7 +33,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a https url with port and without params and path WHEN mapping THEN all values are set`() {
         // given
-        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "https://acme.org:9091", "parentId")
+        val endpointCreateInput = ApiFileCreateInput.Endpoint("someEndpoint", "GET", "https://acme.org:9091", "parentId")
 
         // when
         val endpoint = endpointCreateInput.toEndpoint()
@@ -49,7 +49,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a https url with a param only WHEN mapping THEN all values are set`() {
         // given
-        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "https://acme.org?param=foo", "parentId")
+        val endpointCreateInput = ApiFileCreateInput.Endpoint("someEndpoint", "GET", "https://acme.org?param=foo", "parentId")
 
         // when
         val endpoint = endpointCreateInput.toEndpoint()
@@ -65,7 +65,7 @@ class EndpointMapperTest {
     @Test
     fun `GIVEN a http url with a trailing slash WHEN mapping THEN all values are set`() {
         // given
-        val endpointCreateInput = EndpointCreateInput("someEndpoint", "GET", "https://acme.org/", "parentId")
+        val endpointCreateInput = ApiFileCreateInput.Endpoint("someEndpoint", "GET", "https://acme.org/", "parentId")
 
         // when
         val endpoint = endpointCreateInput.toEndpoint()
