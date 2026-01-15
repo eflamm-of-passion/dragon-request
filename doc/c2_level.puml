@@ -1,0 +1,28 @@
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+HIDE_STEREOTYPE()
+
+AddElementTag("scriptDirectoryTag", $shape=EightSidedShape(), $bgColor="CornflowerBlue", $fontColor="white", $legendText="")
+
+Person(technicalProfessional, "Dev, QA, PO", "a professional that requires to manipulate an existing API")
+
+System_Boundary(dragonRequest, "Dragon Request") {
+    Container(scriptDirectory, "Script directory", "stores the user's script", $tags = "scriptDirectoryTag")
+    Container(scriptUI, "Script UI")
+    Container(scriptEngine, "Script engine", "orchestrate the requests and map the data between them")
+    Container(requestEngine, "Request engine", "sends the requests")
+}
+
+System(targetAPI, "Target API", "the API targeted by the user's requests")
+
+Rel(technicalProfessional, scriptUI, "executes a set of instructions", "scripts")
+Rel(technicalProfessional, scriptDirectory, "submits scripts into")
+Rel_Left(scriptUI, scriptEngine, "launch a script", "")
+Rel_Left(scriptEngine, scriptDirectory, "reads script")
+Rel(scriptEngine, requestEngine, "executes", "")
+Rel(requestEngine, targetAPI, "sends requests to")
+
+@enduml

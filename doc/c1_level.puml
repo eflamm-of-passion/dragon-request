@@ -1,0 +1,15 @@
+!include  https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+@startuml C4_Elements
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+LAYOUT_LEFT_RIGHT()
+
+Person(technicalProfessional, "Dev, QA, PO", "a professional that requires to manipulate an existing API")
+System(dragonRequest, "Dragon Request System", "process the user instructions to send requests to an API")
+System(targetAPI, "Target API", "the API targeted by the user's requests")
+
+Rel(technicalProfessional, dragonRequest, "executes a set of instructions", "scripts")
+Rel(dragonRequest, targetAPI, "requests", "REST")
+
+@enduml
