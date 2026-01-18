@@ -7,7 +7,21 @@
 
 ## Story
 
+### Domain
+
+- execute a script
+
 ### Http script engine
-- send a GET request
-- return result success response
+
+- handle errors 
 - 
+
+### Kotlin script engine
+
+- handle errors
+
+### Cross modules
+
+- housekeeping the versions
+- logger
+- arch unit
