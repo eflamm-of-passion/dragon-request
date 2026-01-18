@@ -7,6 +7,14 @@
 
 ## Story
 
+As a user I want to write a script  
+then I execute the script that   
+sends a request  
+and that checks the result is what is expected
+ 
+
+## Tasks 
+
 ### Domain
 
 - execute a script

@@ -17,6 +17,8 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-scripting-jvm-host:2.3.0")
 
     testImplementation(kotlin("test"))
+    testImplementation(project(":stub"))
+
     testImplementation("io.mockk:mockk:1.14.7")
     testImplementation("io.kotest:kotest-assertions-core:6.0.7")
     testImplementation("org.junit.jupiter:junit-jupiter:6.0.2")

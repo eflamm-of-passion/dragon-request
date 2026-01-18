@@ -1,5 +1,6 @@
 package io.eflamm.dragonrequest.kotlinscriptengine
 
+import io.eflamm.dragonrequest.domain.Logger
 import io.eflamm.dragonrequest.domain.ScriptEngine
 import io.eflamm.dragonrequest.domain.model.RequestInput
 import io.eflamm.dragonrequest.domain.model.RequestResult
@@ -16,7 +17,7 @@ import kotlin.script.experimental.jvm.dependenciesFromCurrentContext
 import kotlin.script.experimental.jvm.jvm
 import kotlin.script.experimental.jvmhost.BasicJvmScriptingHost
 
-class KotlinScriptEngine(private val scriptLoader: ScriptLoader) : ScriptEngine {
+class KotlinScriptEngine(private val scriptLoader: ScriptLoader, private val logger: Logger) : ScriptEngine {
 
     object HttpRequestScript : ScriptCompilationConfiguration({
         jvm {

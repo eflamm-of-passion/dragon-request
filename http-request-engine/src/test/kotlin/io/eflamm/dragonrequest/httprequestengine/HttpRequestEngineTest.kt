@@ -8,6 +8,7 @@ import io.kotest.matchers.nulls.shouldNotBeNull
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Test
+import stub.StubLogger
 
 class HttpRequestEngineTest {
     @Test
@@ -34,7 +35,7 @@ class HttpRequestEngineTest {
         )
 
         // when
-        val actual = HttpRequestEngine(mockedHttpClient).sendRequest(httpRequest) as HttpResponse
+        val actual = HttpRequestEngine(mockedHttpClient, StubLogger).sendRequest(httpRequest) as HttpResponse
 
         // then
         actual shouldNotBeNull {}

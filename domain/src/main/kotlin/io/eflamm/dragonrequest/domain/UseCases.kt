@@ -8,19 +8,19 @@ class UseCases(
     private val requestEngine: RequestEngine,
     private val scriptEngine: ScriptEngine,
 ) {
-    fun executeWorkflow(listScriptNames: List<String>) {
-        listScriptNames.fold(Object() as Any) { previousResult, scriptName ->
+    fun executeWorkflow(listScriptPath: List<String>) {
+        listScriptPath.fold(Object() as Any) { previousResult, scriptName ->
             executeScript(scriptName, EmptyRequestResult)
         }
     }
 
-    fun executeScript(
-        scriptName: String,
+    private fun executeScript(
+        scriptPath: String,
         previousResult: RequestResult,
     ): Any {
-        val request: RequestInput = scriptEngine.buildRequest(scriptName, previousResult)
+        val request: RequestInput = scriptEngine.buildRequest(scriptPath, previousResult)
         val result: RequestResult = requestEngine.sendRequest(request)
-        scriptEngine.validateResult(scriptName, result)
+        scriptEngine.validateResult(scriptPath, result)
         return result
     }
 }

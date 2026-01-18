@@ -7,6 +7,7 @@ import io.eflamm.dragonrequest.model.http.HttpRequest
 import io.kotest.matchers.shouldBe
 import kotlin.script.experimental.api.SourceCode
 import org.junit.jupiter.api.Test
+import stub.StubLogger
 
 class KotlinScriptEngineTest {
     @Test
@@ -25,7 +26,7 @@ class KotlinScriptEngineTest {
         val resourceScriptLoader = ResourceScriptLoader()
 
         // when
-        val actual = KotlinScriptEngine(resourceScriptLoader).buildRequest(scriptPath, EmptyRequestResult)
+        val actual = KotlinScriptEngine(resourceScriptLoader, StubLogger).buildRequest(scriptPath, EmptyRequestResult)
 
         // then
         actual shouldBe expectedHttpRequest
