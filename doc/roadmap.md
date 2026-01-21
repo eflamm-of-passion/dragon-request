@@ -8,12 +8,11 @@
 ## Story
 
 As a user I want to write a script  
-then I execute the script that   
+then I execute the script that  
 sends a request  
 and that checks the result is what is expected
- 
 
-## Tasks 
+## Tasks
 
 ### Domain
 
@@ -21,8 +20,8 @@ and that checks the result is what is expected
 
 ### Http script engine
 
-- handle errors 
-- 
+- handle errors
+-
 
 ### Kotlin script engine
 
@@ -31,5 +30,4 @@ and that checks the result is what is expected
 ### Cross modules
 
 - housekeeping the versions
-- logger
 - arch unit

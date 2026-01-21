@@ -13,6 +13,11 @@ class HttpRequestEngine(
 ) : RequestEngine {
     override fun sendRequest(request: RequestInput): RequestResult {
         val httpRequest = request as HttpRequest
-        return httpClient.sendRequest(httpRequest)
+        logger.info { "request ${httpRequest.method} - ${httpRequest.url}" }
+        logger.debug { "${httpRequest.body}" }
+        val httpResponse = httpClient.sendRequest(httpRequest)
+        logger.info { "response ${httpRequest.method} ${httpResponse.code} - ${httpRequest.url}" }
+        logger.debug { "${httpResponse.body}" }
+        return httpResponse
     }
 }

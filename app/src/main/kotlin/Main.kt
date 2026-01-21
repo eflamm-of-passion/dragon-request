@@ -12,9 +12,14 @@ import java.net.http.HttpClient
 
 fun main(args: Array<String>) {
     val useCases = UseCases(requestEngine(), scriptEngine())
-    useCases.executeWorkflow(listOf("")) // TODO give a script
+    useCases.executeWorkflow(listOf("scripts/first-post-request.kts")) // TODO give a script
 }
 
-private fun scriptEngine(): ScriptEngine = KotlinScriptEngine(ResourceScriptLoader(), LoggerFactory.forClass(KotlinScriptEngine::class.java))
-private fun requestEngine(): RequestEngine = HttpRequestEngine(JavaNetHttpClient(HttpClient.newBuilder().build()), LoggerFactory.forClass(HttpRequestEngine::class.java))
+private fun scriptEngine(): ScriptEngine =
+    KotlinScriptEngine(ResourceScriptLoader(), LoggerFactory.forClass(KotlinScriptEngine::class.java))
+
+private fun requestEngine(): RequestEngine = HttpRequestEngine(
+    JavaNetHttpClient(HttpClient.newBuilder().build()),
+    LoggerFactory.forClass(HttpRequestEngine::class.java)
+)
 
