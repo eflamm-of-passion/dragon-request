@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
+    alias(libs.plugins.kotlinJvm)
 }
 
 group = "io.eflamm.dragon-request"
@@ -12,10 +12,10 @@ repositories {
 dependencies {
     implementation(project(":domain"))
 
-    implementation("org.slf4j:slf4j-api:2.0.17")
-    implementation("ch.qos.logback:logback-classic:1.5.25")
+    implementation(libs.slf4j)
+    implementation(libs.logback)
 
-    testImplementation(kotlin("test"))
+    testImplementation(libs.kotlinTest)
 }
 
 tasks.test {

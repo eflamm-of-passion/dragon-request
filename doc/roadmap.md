@@ -16,7 +16,7 @@ and that checks the result is what is expected
 
 ### Domain
 
-- execute a script
+- execute two following scripts
 
 ### Http script engine
 
@@ -29,5 +29,4 @@ and that checks the result is what is expected
 
 ### Cross modules
 
-- housekeeping the versions
 - arch unit

@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.0"
+    alias(libs.plugins.kotlinJvm)
 }
 
 group = "io.eflamm.dragon-request"
