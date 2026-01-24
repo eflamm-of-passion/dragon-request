@@ -1,0 +1,9 @@
+{
+  "packageRules": [
+    {
+      "matchPackageNames": ["*"],
+      "groupName": "Update everything",
+      "groupSlug": "everything"
+    }
+  ]
+}
